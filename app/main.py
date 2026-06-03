@@ -2,6 +2,9 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 
+from sqlalchemy import text
+from app.core.database import AsyncSessionLocal
+
 app = FastAPI(
     title="Akumart API",
     description="B2B Waste to Resource Marketplace",

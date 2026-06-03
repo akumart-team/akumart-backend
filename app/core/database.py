@@ -2,10 +2,11 @@ from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sess
 from sqlalchemy.orm import DeclarativeBase
 from app.core.config import settings
 
-engine = create_async_engine(settings.DATABASE_URL, echo=True)
+# Async engine — used by FastAPI at runtime
+async_engine = create_async_engine(settings.DATABASE_URL, echo=True)
 
 AsyncSessionLocal = async_sessionmaker(
-    bind=engine,
+    bind=async_engine,
     class_=AsyncSession,
     expire_on_commit=False
 )
@@ -13,7 +14,6 @@ AsyncSessionLocal = async_sessionmaker(
 class Base(DeclarativeBase):
     pass
 
-# Dependency — equivalent to Django's db connection per request
 async def get_db():
     async with AsyncSessionLocal() as session:
         yield session
