@@ -1,0 +1,114 @@
+name: Security Scanner & Code Quality
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  # JOB 1 – Python Type Check 
+  typecheck:
+    name: Python Type Check 
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install dependencies & mypy
+        run: |
+          pip install -r requirements.txt
+          pip install mypy
+
+      - name: Run mypy
+        run: mypy app/ --ignore-missing-imports --pretty
+
+  # JOB 2 – Python Lint
+  lint:
+    name: Python Lint
+    runs-on: ubuntu-latest
+    needs: typecheck
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install flake8
+        run: pip install flake8
+
+      - name: Run flake8 (save report)
+        run: flake8 app/ --format=default 2>&1 | tee flake8-report.txt
+        continue-on-error: true
+
+      - name: Upload flake8 report artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: flake8-lint-report
+          path: flake8-report.txt
+          retention-days: 14
+
+      # Re-run without tee so exit code is propagated correctly
+      - name: Assert lint passes
+        run: flake8 app/
+
+  # JOB 3 – Trivy Filesystem Vulnerability Scan
+  trivy-scan:
+    name: Trivy Vulnerability Scan
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # --- HTML report (Can be viewed in browser) ---
+      - name: Run Trivy
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: fs
+          scan-ref: "."
+          format: template
+          template: "@/contrib/html.tpl"
+          output: trivy-report.html
+          severity: CRITICAL,HIGH
+          exit-code: "0"
+          ignore-unfixed: false
+          vuln-type: "os,library"
+
+      # --- Plaintext table report (readable in CI logs) ---
+      - name: Run Trivy 
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: fs
+          scan-ref: "."
+          format: table
+          output: trivy-report.txt
+          severity: CRITICAL,HIGH
+          exit-code: "1"
+          ignore-unfixed: false
+          vuln-type: "os,library"
+
+      # Upload both reports regardless of scan pass/fail
+      - name: Upload Trivy reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: trivy-vulnerability-report
+          path: |
+            trivy-report.html
+            trivy-report.txt
+          retention-days: 30
