@@ -6,11 +6,13 @@ from datetime import datetime, timezone
 from sqlalchemy import DateTime
 from sqlalchemy.orm import Mapped, mapped_column
 
+
 def utcnow():
     """
     Return the current system time in the UTC timezone.
     """
     return datetime.now(timezone.utc)
+
 
 class TimestampMixin:
     """

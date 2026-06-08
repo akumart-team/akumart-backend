@@ -4,6 +4,7 @@ Enumeration types for the AkuMart platform marketplace.
 
 import enum
 
+
 class UserRole(enum.Enum):
     """
     System access levels and operational roles for marketplace users.
@@ -12,6 +13,7 @@ class UserRole(enum.Enum):
     BUYER = 'buyer'
     SELLER = 'seller'
     ADMIN = 'admin'
+
 
 class OrderStatus(enum.Enum):
     """
@@ -26,6 +28,7 @@ class OrderStatus(enum.Enum):
     CANCELLED = 'cancelled'
     DISPUTED = 'disputed'
 
+
 class PaymentMethod(enum.Enum):
     """
     Supported payment channels for transaction settlement.
@@ -35,6 +38,7 @@ class PaymentMethod(enum.Enum):
     DEBIT = 'debit'
     BANK_TRANSFER = 'bank_transfer'
     CCRYPTO = 'crypto'
+
 
 class PaymentStatus(enum.Enum):
     """
@@ -46,6 +50,7 @@ class PaymentStatus(enum.Enum):
     RELEASED = 'released'
     REFUNDED = 'refunded'
     FAILED = 'failed'
+
 
 class ShipmentStatus(enum.Enum):
     """
@@ -59,6 +64,7 @@ class ShipmentStatus(enum.Enum):
     DELIVERED = 'delivered'
     FAILED = 'failed'
 
+
 class ContentType(enum.Enum):
     """
     Classification of content structures within the platform CMS.
@@ -67,6 +73,7 @@ class ContentType(enum.Enum):
     ARTICLE = 'article'
     SELLER_POST = 'seller_post'
     ANNOUNCEMENT = 'announcement'
+
 
 class AdPlacement(enum.Enum):
     """

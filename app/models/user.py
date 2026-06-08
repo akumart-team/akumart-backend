@@ -10,6 +10,7 @@ from app.core.database import Base
 from app.models.base import TimestampMixin
 from app.models.enum import UserRole
 
+
 class User(Base, TimestampMixin):
     """
     Core user account model for the AkuMart platform.
@@ -42,6 +43,7 @@ class User(Base, TimestampMixin):
         back_populates='user', uselist=False, lazy='select'
     )
 
+
 class SellerProfile(Base):
     """
     Extension profile for users acting as marketplace sellers.
@@ -65,6 +67,7 @@ class SellerProfile(Base):
     account_name: Mapped[str | None] = mapped_column(String(100))
 
     user: Mapped['User'] = relationship(back_populates='seller_profile')
+
 
 class BuyerProfile(Base):
     """
