@@ -1,5 +1,6 @@
 """
-Configuration management module for the AkuMart platform.
+Environment-driven application settings via pydantic-settings.
+All values are read from environment variables or a .env file.
 """
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -7,17 +8,36 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     """
-    Application settings and environment variable schema.
+    Central config object.  Add every env var here — never read
+    os.environ directly anywhere else in the codebase.
     """
 
-    DATABASE_URL: str
-    SECRET_KEY: str
-    ALGORITHM: str = "HS256"
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
-    SUPABASE_URL: str
-    SUPABASE_KEY: str
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        case_sensitive=False,
+    )
 
-    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
+    # App
+    APP_NAME: str = "AkuMart API"
+    DEBUG: bool = False
+
+    # Database (Supabase / PostgreSQL)
+    DATABASE_URL: str  # asyncpg DSN: postgresql+asyncpg://...
+
+    # JWT
+    SECRET_KEY: str
+    JWT_ALGORITHM: str = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+    REFRESH_TOKEN_EXPIRE_DAYS: int = 7
+
+    # Cloudinary
+    CLOUDINARY_CLOUD_NAME: str = ""
+    CLOUDINARY_API_KEY: str = ""
+    CLOUDINARY_API_SECRET: str = ""
+
+    # Misc
+    CORS_ORIGINS: list[str] = ["*"]
 
 
 settings = Settings()
