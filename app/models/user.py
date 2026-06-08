@@ -1,3 +1,7 @@
+"""
+Database models for user management and profiles in the AkuMart platform.
+"""
+
 import uuid
 from sqlalchemy import String, Boolean, Numeric, Text, ARRAY, JSON
 from sqlalchemy.dialects.postgresql import UUID
@@ -7,6 +11,10 @@ from app.models.base import TimestampMixin
 from app.models.enum import UserRole
 
 class User(Base, TimestampMixin):
+    """
+    Core user account model for the AkuMart platform.
+    """
+
     __tablename__ = 'users'
     id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
@@ -25,7 +33,7 @@ class User(Base, TimestampMixin):
     avatar_url: Mapped[str | None] = mapped_column(Text)
     is_verified: Mapped[bool] = mapped_column(Boolean, default=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
-    
+
     # Relationships
     seller_profile: Mapped["SellerProfile"] = relationship(
         back_populates='user', uselist=False, lazy='select'
@@ -35,8 +43,12 @@ class User(Base, TimestampMixin):
     )
 
 class SellerProfile(Base):
+    """
+    Extension profile for users acting as marketplace sellers.
+    """
+
     __tablename__ = 'seller_profiles'
-    
+
     id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
     )
@@ -51,12 +63,16 @@ class SellerProfile(Base):
     bank_name: Mapped[str | None] = mapped_column(String(100))
     bank_account_no: Mapped[str | None] = mapped_column(String(20))
     account_name: Mapped[str | None] = mapped_column(String(100))
-    
+
     user: Mapped['User'] = relationship(back_populates='seller_profile')
 
 class BuyerProfile(Base):
+    """
+    Extension profile for users purchasing resources on the marketplace.
+    """
+
     __tablename__ = 'buyer_profiles'
-    
+
     id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
     )
@@ -64,5 +80,5 @@ class BuyerProfile(Base):
     preferred_location: Mapped[str | None] = mapped_column(String(100))
     ai_pref_vector: Mapped[dict | None] = mapped_column(JSON)
     last_search_at: Mapped[str | None] = mapped_column(String)
-    
+
     user: Mapped['User'] = relationship(back_populates='buyer_profile')

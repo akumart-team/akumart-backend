@@ -1,9 +1,9 @@
+"""
+Main entry point for the Akumart API application.
+"""
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.core.config import settings
-
-from sqlalchemy import text
-from app.core.database import AsyncSessionLocal
 
 app = FastAPI(
     title="Akumart API",
@@ -21,4 +21,5 @@ app.add_middleware(
 
 @app.get("/health")
 async def health_check():
+    """Verify the API service status and availability."""
     return {"status": "ok", "service": "AkuMart API"}

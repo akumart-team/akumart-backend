@@ -1,47 +1,79 @@
+"""
+Enumeration types for the AkuMart platform marketplace.
+"""
+
 import enum
 
 class UserRole(enum.Enum):
-    buyer = 'buyer'
-    seller = 'seller'
-    admin = 'admin'
+    """
+    System access levels and operational roles for marketplace users.
+    """
+
+    BUYER = 'buyer'
+    SELLER = 'seller'
+    ADMIN = 'admin'
 
 class OrderStatus(enum.Enum):
-    pending = 'pending'
-    accepted = 'accepted'
-    in_transit = 'in_transit'
-    delivered = 'delivered'
-    completed = 'completed'
-    cancelled = 'cancelled'
-    disputed = 'disputed'
+    """
+    The lifecycle states of a marketplace transaction/order.
+    """
+
+    PENDING = 'pending'
+    ACCEPTED = 'accepted'
+    IN_TRANSIT = 'in_transit'
+    DELIVERED = 'delivered'
+    COMPLETED = 'completed'
+    CANCELLED = 'cancelled'
+    DISPUTED = 'disputed'
 
 class PaymentMethod(enum.Enum):
-    credit = 'credit'
-    debit = 'debit'
-    bank_transfer = 'bank_transfer'
-    crypto = 'crypto'
+    """
+    Supported payment channels for transaction settlement.
+    """
+
+    CREDIT = 'credit'
+    DEBIT = 'debit'
+    BANK_TRANSFER = 'bank_transfer'
+    CCRYPTO = 'crypto'
 
 class PaymentStatus(enum.Enum):
-    pending = 'pending'
-    held = 'held'
-    released = 'released'
-    refunded = 'refunded'
-    failed = 'failed'
+    """
+    The financial lifecycle states of an escrow or payment transaction.
+    """
+
+    PENDING = 'pending'
+    HELD = 'held'
+    RELEASED = 'released'
+    REFUNDED = 'refunded'
+    FAILED = 'failed'
 
 class ShipmentStatus(enum.Enum):
-    pending = 'pending'
-    picked_up = 'picked_up'
-    in_transit = 'in_transit'
-    out_for_delivery = 'out_for_delivery'
-    delivered = 'delivered'
-    failed = 'failed'
+    """
+    Logistical tracking states for fulfillment and delivery.
+    """
+
+    PENDING = 'pending'
+    PICKED_UP = 'picked_up'
+    IN_TRANSIT = 'in_transit'
+    OUT_FOR_DELIVERY = 'out_for_delivery'
+    DELIVERED = 'delivered'
+    FAILED = 'failed'
 
 class ContentType(enum.Enum):
-    article = 'article'
-    seller_post = 'seller_post'
-    announcement = 'announcement'
+    """
+    Classification of content structures within the platform CMS.
+    """
+
+    ARTICLE = 'article'
+    SELLER_POST = 'seller_post'
+    ANNOUNCEMENT = 'announcement'
 
 class AdPlacement(enum.Enum):
-    fyp_top = 'fyp_top'
-    fyp_inline = 'fyp_inline'
-    search_top = 'search_top'
-    category_banner = 'category_banner'
+    """
+    Targeted display layout regions for advertising and promoted content.
+    """
+
+    FYP_TOP = 'fyp_top'
+    FYP_INLINE = 'fyp_inline'
+    SEARCH_TOP = 'search_top'
+    CATEGORY_BANNER = 'category_banner'
