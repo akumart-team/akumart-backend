@@ -5,6 +5,7 @@ Main entry point for the Akumart API application.
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+
 app = FastAPI(
     title="Akumart API",
     description="B2B Waste to Resource Marketplace",
@@ -18,6 +19,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 @app.get("/health")
 async def health_check():
