@@ -23,7 +23,9 @@ class User(Base, TimestampMixin):
     role: Mapped[UserRole] = mapped_column(String(20), nullable=False)
     first_name: Mapped[str] = mapped_column(String(50), nullable=False)
     last_name: Mapped[str] = mapped_column(String(50), nullable=False)
-    email: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
+    email: Mapped[str] = mapped_column(
+        String(255), unique=True, nullable=False
+    )
     phone: Mapped[str] = mapped_column(String(20), unique=True, nullable=False)
     password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
     business_name: Mapped[str | None] = mapped_column(String(200))

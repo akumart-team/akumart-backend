@@ -4,6 +4,7 @@ Configuration management module for the AkuMart platform.
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+
 class Settings(BaseSettings):
     """
     Application settings and environment variable schema.
@@ -17,5 +18,6 @@ class Settings(BaseSettings):
     SUPABASE_KEY: str
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
+
 
 settings = Settings()
