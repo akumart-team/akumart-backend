@@ -6,7 +6,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Literal
 
 import bcrypt
-from jose import jwt
+import jwt
 
 from app.core.config import settings
 from app.schemas.auth import TokenPayload
@@ -50,7 +50,9 @@ def _make_token(
         "iat": int(now.timestamp()),
         "exp": int(expire.timestamp()),
     }
-    return jwt.encode(payload, settings.SECRET_KEY, algorithm=settings.JWT_ALGORITHM)
+    return jwt.encode(
+        payload, settings.SECRET_KEY, algorithm=settings.JWT_ALGORITHM
+    )
 
 
 def create_access_token(user_id: str, role: str) -> str:

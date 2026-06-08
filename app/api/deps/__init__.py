@@ -11,11 +11,12 @@ Provides:
 """
 
 import uuid
+from collections.abc import AsyncGenerator
 from typing import Annotated
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from jose import JWTError
+from jwt.exceptions import InvalidTokenError
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
@@ -33,7 +34,7 @@ _bearer = HTTPBearer(auto_error=False)
 
 # Database session
 
-async def get_db() -> AsyncSession:  # type: ignore[return]
+async def get_db() -> AsyncGenerator[AsyncSession, None]:
     """
     Yield a single AsyncSession per request, then close it.
     Use as: `db: AsyncSession = Depends(get_db)`
@@ -67,7 +68,7 @@ async def get_current_user(
 
     try:
         payload = decode_token(credentials.credentials)
-    except JWTError as exc:
+    except InvalidTokenError as exc:
         raise _unauthorized from exc
 
     if payload.type != "access":
@@ -101,7 +102,6 @@ CurrentUser = Annotated[User, Depends(get_current_user)]
 
 
 # Role guards
-
 
 def _require_role(role: UserRole):
     """
