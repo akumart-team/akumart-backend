@@ -5,7 +5,7 @@ Enumeration types for the AkuMart platform marketplace.
 import enum
 
 
-class UserRole(enum.Enum):
+class UserRole(str, enum.Enum):
     """
     System access levels and operational roles for marketplace users.
     """
@@ -15,7 +15,7 @@ class UserRole(enum.Enum):
     ADMIN = 'admin'
 
 
-class OrderStatus(enum.Enum):
+class OrderStatus(str, enum.Enum):
     """
     The lifecycle states of a marketplace transaction/order.
     """
@@ -29,7 +29,7 @@ class OrderStatus(enum.Enum):
     DISPUTED = 'disputed'
 
 
-class PaymentMethod(enum.Enum):
+class PaymentMethod(str, enum.Enum):
     """
     Supported payment channels for transaction settlement.
     """
@@ -40,7 +40,7 @@ class PaymentMethod(enum.Enum):
     CCRYPTO = 'crypto'
 
 
-class PaymentStatus(enum.Enum):
+class PaymentStatus(str, enum.Enum):
     """
     The financial lifecycle states of an escrow or payment transaction.
     """
@@ -52,7 +52,7 @@ class PaymentStatus(enum.Enum):
     FAILED = 'failed'
 
 
-class ShipmentStatus(enum.Enum):
+class ShipmentStatus(str, enum.Enum):
     """
     Logistical tracking states for fulfillment and delivery.
     """
@@ -65,7 +65,7 @@ class ShipmentStatus(enum.Enum):
     FAILED = 'failed'
 
 
-class ContentType(enum.Enum):
+class ContentType(str, enum.Enum):
     """
     Classification of content structures within the platform CMS.
     """
@@ -75,7 +75,7 @@ class ContentType(enum.Enum):
     ANNOUNCEMENT = 'announcement'
 
 
-class AdPlacement(enum.Enum):
+class AdPlacement(str, enum.Enum):
     """
     Targeted display layout regions for advertising and promoted content.
     """
@@ -86,7 +86,7 @@ class AdPlacement(enum.Enum):
     CATEGORY_BANNER = 'category_banner'
 
 
-class WasteCategories(enum.Enum):
+class WasteCategories(str, enum.Enum):
     """
     Waste Categories to classify users (buyers and sellers included)
     """
