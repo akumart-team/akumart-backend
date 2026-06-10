@@ -10,7 +10,15 @@ from app.core.config import settings
 
 
 # Async engine — used by FastAPI at runtime
-async_engine = create_async_engine(settings.DATABASE_URL, echo=True)
+async_engine = create_async_engine(
+    settings.DATABASE_URL,
+    echo=True,
+
+    # Required when connecting via Pg Bouncer
+    connect_args = {
+        "statement_cache_size": 0,
+    }
+)
 
 
 async_session_local = async_sessionmaker(

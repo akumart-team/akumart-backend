@@ -1,5 +1,8 @@
-venv
+venv/
 .env
-app/__pycache__
-app/core/__pycache__
-.mypy_cache
+.mypy_cache/
+
+# Python cache — catches all of them
+__pycache__/
+*.pyc
+*.pyo
