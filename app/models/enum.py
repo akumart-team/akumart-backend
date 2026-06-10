@@ -84,3 +84,16 @@ class AdPlacement(enum.Enum):
     FYP_INLINE = 'fyp_inline'
     SEARCH_TOP = 'search_top'
     CATEGORY_BANNER = 'category_banner'
+
+class WasteCategories(enum.Enum):
+    """
+    Waste Categories to classify users (buyers and sellers included)
+    """
+
+    PAPER = 'paper'
+    PLASTIC = 'plastic'
+    FABRIC = 'fabric'
+    WOOD = 'wood'
+    METAL = 'metal'
+    ELECTRONIC_WASTE = 'electronic_waste'
+    OTHER = 'other'

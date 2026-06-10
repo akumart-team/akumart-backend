@@ -4,6 +4,7 @@ Main entry point for the Akumart API application.
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from app.api.routers import all_routers
 
 
 app = FastAPI(
@@ -19,6 +20,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+for _router in all_routers:
+    app.include_router(_router, prefix="/api/v1")
 
 
 @app.get("/health")

@@ -3,6 +3,7 @@ Pydantic request/response schemas for authentication flows.
 """
 
 from pydantic import EmailStr, Field, field_validator
+from typing import Literal
 
 from app.models.enum import UserRole
 from app.schemas.base import AkumartSchema
@@ -13,6 +14,7 @@ from app.schemas.user import UserOut
 
 class RegisterRequest(AkumartSchema):
     """
+    Body schema for ``POST /auth/register``.
     Payload for new account creation.
     Accepted for both buyer and seller roles — admin accounts are
     created exclusively through the admin panel.
@@ -54,6 +56,33 @@ class RegisterRequest(AkumartSchema):
             )
         return value
 
+    @field_validator("first_name", "last_name", mode="before")
+    @classmethod
+    def strip_name(cls, v: str) -> str:
+        """
+        Strip surrounding whitespace from name fields
+        """
+
+        return v.strip()
+
+    @field_validator("email", mode="before")
+    @classmethod
+    def normalise_email(cls, v:str) -> str:
+        """
+        Lowercase the e-mail so lookups are case-insensitive.
+        """
+
+        return v.strip().lower()
+
+    @field_validator("phone", mode="before")
+    @classmethod
+    def strip_phone(cls, v: str) -> str:
+        """
+        Remove stray spaces from phone numbers
+        """
+
+        return v.strip()
+
 
 class RegisterResponse(AkumartSchema):
     """
@@ -79,6 +108,15 @@ class LoginRequest(AkumartSchema):
     email: EmailStr
     password: str = Field(..., min_length=1)
 
+    @field_validator("email", mode="before")
+    @classmethod
+    def normalise_email(cls, v: str) -> str:
+        """
+        Lowercase the e-mail to match stored value
+        """
+
+        return v.strip().lower()
+
 
 class LoginResponse(AkumartSchema):
     """
@@ -91,6 +129,16 @@ class LoginResponse(AkumartSchema):
     user: UserOut
 
 
+class LogoutRequest(AkumartSchema):
+    """
+    Body schema for ``POST /auth/logout``.
+    The refresh token is accepted so the server can invalidate it.
+    """
+
+
+    refresh_token: str = Field(..., min_length=1)
+
+
 # Token refresh
 
 class TokenRefreshRequest(AkumartSchema):
@@ -98,7 +146,7 @@ class TokenRefreshRequest(AkumartSchema):
     Payload carrying the long-lived refresh token.
     """
 
-    refresh_token: str
+    refresh_token: str = Field(..., min_length=1)
 
 
 class TokenRefreshResponse(AkumartSchema):
@@ -112,6 +160,15 @@ class TokenRefreshResponse(AkumartSchema):
     token_type: str = "bearer"
 
 
+# General message response for authentication requests
+class MessageResponse(AkumartSchema):
+    """
+    Generic single-field response for operations that have no domain payload.
+    """
+
+    message: str
+
+
 # Internal token payload (not an API schema — used by JWT helpers)
 class TokenPayload(AkumartSchema):
     """
@@ -122,5 +179,6 @@ class TokenPayload(AkumartSchema):
 
     sub: str
     role: str
-    type: str  # "access" | "refresh"
+    type: Literal["access", "refresh"]
+    iat: int
     exp: int
