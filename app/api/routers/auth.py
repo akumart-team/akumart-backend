@@ -7,7 +7,7 @@ POST /auth/register   — create account, auto-login, return token pair
 POST /auth/login      — verify credentials, return token pair
 POST /auth/refresh    — exchange refresh token for a new pair
 POST /auth/logout     — invalidate refresh token
-GET  /auth/me         — return the authenticated user's own profile 
+GET  /auth/me         — return the authenticated user's own profile
 """
 
 from typing import Annotated
@@ -47,7 +47,7 @@ async def register(
 ) -> RegisterResponse:
     """
     Create a new user account.
- 
+
     - Validates uniqueness of e-mail and phone.
     - Enforces password strength policy (digit + uppercase).
     - Hashes password with bcrypt before persistence.
@@ -70,7 +70,7 @@ async def login(
 ) -> LoginResponse:
     """
     Verify credentials and issue a JWT access + refresh token pair.
- 
+
     Returns HTTP 401 for both bad e-mail and bad password to prevent
     user-enumeration attacks.
     """
@@ -88,7 +88,7 @@ async def refresh(
 ) -> TokenRefreshResponse:
     """
     Exchange a refresh token for a new access + refresh token pair.
- 
+
     Uses a rotating refresh-token strategy — the submitted token is
     consumed and must not be reused. Store the new pair returned.
     """
@@ -106,7 +106,7 @@ async def logout(
 ) -> MessageResponse:
     """
     Revoke the supplied refresh token.
- 
+
     Phase 3 — stateless stub. The client must discard stored tokens.
     A server-side deny-list will be wired in Phase 4.
     """
@@ -125,7 +125,7 @@ async def me(
     """
     Return the full profile of the authenticated user, including the
     role-specific sub-profile (seller or buyer) where available.
- 
+
     Sub-profiles are loaded eagerly by the ``get_current_user`` dependency.
     """
     return UserOut.model_validate(current_user)

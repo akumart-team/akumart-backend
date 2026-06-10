@@ -85,6 +85,7 @@ class AdPlacement(enum.Enum):
     SEARCH_TOP = 'search_top'
     CATEGORY_BANNER = 'category_banner'
 
+
 class WasteCategories(enum.Enum):
     """
     Waste Categories to classify users (buyers and sellers included)

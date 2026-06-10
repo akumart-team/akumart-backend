@@ -1,8 +1,8 @@
 """
 Authentication business logic for the AkuMart platform.
- 
+
 All database I/O and token operations live here; routers stay thin.
- 
+
 Public surface:
   - register_user   -> (User, TokenResponse)
   - login_user      -> TokenResponse
@@ -37,6 +37,7 @@ from app.schemas.auth import (
     TokenRefreshResponse
 )
 from app.schemas.user import UserOut
+
 
 # Helpers
 def _make_tokens(user_id: uuid.UUID, role: UserRole) -> tuple[str, str]:
@@ -86,7 +87,7 @@ async def register_user(
     4. Create the matching ``BuyerProfile`` or ``SellerProfile``.
     5. Reload the user with sub-profiles eagerly loaded.
     6. Build and return the ``RegisterResponse``.
- 
+
     Raises
     ------
     HTTP 409  — e-mail or phone already registered.
@@ -160,7 +161,7 @@ async def login_user(
 ) -> LoginResponse:
     """
     Verify credentials and return a token pair + user object.
- 
+
     Raises
     ------
     HTTP 401  — bad credentials (deliberately vague to prevent enumeration).
@@ -175,13 +176,18 @@ async def login_user(
     result = await db.execute(select(User).where(User.email == payload.email))
     user: User | None = result.scalar_one_or_none()
 
-    if user is None or not verify_password(payload.password, user.password_hash):
+    if user is None or not verify_password(
+        payload.password, user.password_hash
+    ):
         raise _bad_creds
 
     if not user.is_active:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="This account has been deactivated. Please contact support.",
+            detail=(
+                "This account has been deactivated."
+                "Please contact support."
+            ),
         )
 
     # Reload with sub-profiles so UserOut serialises correctly
@@ -203,7 +209,7 @@ async def refresh_tokens(
 ) -> TokenRefreshResponse:
     """
     Validate a refresh token and rotate it into a new token pair.
- 
+
     Raises
     ------
     HTTP 401  — token invalid, expired, or wrong type.
