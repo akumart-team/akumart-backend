@@ -135,7 +135,6 @@ class LogoutRequest(AkumartSchema):
     The refresh token is accepted so the server can invalidate it.
     """
 
-
     refresh_token: str = Field(..., min_length=1)
 
 
