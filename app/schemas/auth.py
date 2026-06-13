@@ -2,8 +2,8 @@
 Pydantic request/response schemas for authentication flows.
 """
 
-from pydantic import EmailStr, Field, field_validator
 from typing import Literal
+from pydantic import EmailStr, Field, field_validator
 
 from app.models.enum import UserRole
 from app.schemas.base import AkumartSchema
@@ -67,10 +67,8 @@ class RegisterRequest(AkumartSchema):
 
     @field_validator("email", mode="before")
     @classmethod
-    def normalise_email(cls, v:str) -> str:
-        """
-        Lowercase the e-mail so lookups are case-insensitive.
-        """
+    def normalise_email(cls, v: str) -> str:
+        """Lowercase the e-mail so lookups are case-insensitive."""
 
         return v.strip().lower()
 

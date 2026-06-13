@@ -15,9 +15,7 @@ async_engine = create_async_engine(
     echo=True,
 
     # Required when connecting via Pg Bouncer
-    connect_args = {
-        "statement_cache_size": 0,
-    }
+    connect_args = {"statement_cache_size": 0}
 )
 
 
