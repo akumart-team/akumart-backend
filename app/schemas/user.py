@@ -8,7 +8,7 @@ from typing import Optional
 
 from pydantic import EmailStr, Field
 
-from app.models.enum import UserRole
+from app.models.enum import UserRole, WasteCategories, NigerianStates
 from app.schemas.base import AkumartSchema
 
 
@@ -22,6 +22,7 @@ class SellerProfileOut(AkumartSchema):
     id: uuid.UUID
     bio: Optional[str] = None
     production_description: Optional[str] = None
+    waste_categories: list[WasteCategories] = Field(default_factory=list)
     avg_response_hrs: float = 0.0
     completion_rate: float = 0.0
     total_kg_sold: float = 0.0
@@ -41,6 +42,7 @@ class SellerProfileUpdate(AkumartSchema):
 
     bio: Optional[str] = Field(None, max_length=1000)
     production_description: Optional[str] = Field(None, max_length=2000)
+    waste_categories: Optional[list[WasteCategories]] = None
     bank_name: Optional[str] = Field(None, max_length=100)
     bank_account_no: Optional[str] = Field(None, max_length=20)
     account_name: Optional[str] = Field(None, max_length=100)
@@ -52,7 +54,7 @@ class BuyerProfileOut(AkumartSchema):
     """
 
     id: uuid.UUID
-    preferred_categories: Optional[list[str]] = None
+    preferred_categories: Optional[list[WasteCategories]] = None
     preferred_location: Optional[str] = None
     last_search_at: Optional[str] = None
     # ai_pref_vector is an internal embedding — excluded from API output.
@@ -63,7 +65,7 @@ class BuyerProfileUpdate(AkumartSchema):
     Partial update payload for buyer profile fields.
     """
 
-    preferred_categories: Optional[list[str]] = None
+    preferred_categories: Optional[list[WasteCategories]] = None
     preferred_location: Optional[str] = Field(None, max_length=100)
 
 
@@ -82,7 +84,7 @@ class UserBase(AkumartSchema):
     phone: str
     business_name: Optional[str] = None
     business_type: Optional[str] = None
-    state: Optional[str] = None
+    state: NigerianStates
     city: Optional[str] = None
     address: Optional[str] = None
     avatar_url: Optional[str] = None
@@ -128,6 +130,6 @@ class UserUpdate(AkumartSchema):
     last_name: Optional[str] = Field(None, max_length=50)
     business_name: Optional[str] = Field(None, max_length=200)
     business_type: Optional[str] = Field(None, max_length=100)
-    state: Optional[str] = Field(None, max_length=100)
+    state: Optional[NigerianStates] = None
     city: Optional[str] = Field(None, max_length=100)
     address: Optional[str] = None

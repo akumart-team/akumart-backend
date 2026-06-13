@@ -8,7 +8,7 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.core.database import Base
 from app.models.base import TimestampMixin
-from app.models.enum import UserRole
+from app.models.enum import UserRole, NigerianStates
 
 
 class User(Base, TimestampMixin):
@@ -30,7 +30,7 @@ class User(Base, TimestampMixin):
     password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
     business_name: Mapped[str | None] = mapped_column(String(200))
     business_type: Mapped[str | None] = mapped_column(String(100))
-    state: Mapped[str | None] = mapped_column(String(100))
+    state: Mapped[NigerianStates] = mapped_column(String(50))
     city: Mapped[str | None] = mapped_column(String(100))
     address: Mapped[str | None] = mapped_column(Text)
     avatar_url: Mapped[str | None] = mapped_column(Text)
@@ -64,6 +64,7 @@ class SellerProfile(Base):
     )
     bio: Mapped[str | None] = mapped_column(Text)
     production_description: Mapped[str | None] = mapped_column(Text)
+    waste_categories: Mapped[list[str]] = mapped_column(ARRAY(String), default=list)
     avg_response_hrs: Mapped[float] = mapped_column(Numeric(6, 2), default=0)
     completion_rate: Mapped[float] = mapped_column(Numeric(5, 2), default=0)
     total_kg_sold: Mapped[float] = mapped_column(Numeric(14, 2), default=0)
@@ -93,7 +94,7 @@ class BuyerProfile(Base):
         unique=True,
         nullable=False,
     )
-    preferred_categories: Mapped[list | None] = mapped_column(ARRAY(String))
+    preferred_categories: Mapped[list[str] | None] = mapped_column(ARRAY(String), default=list)
     preferred_location: Mapped[str | None] = mapped_column(String(100))
     ai_pref_vector: Mapped[dict | None] = mapped_column(JSON)
     last_search_at: Mapped[str | None] = mapped_column(String)
