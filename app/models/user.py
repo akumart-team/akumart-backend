@@ -64,7 +64,9 @@ class SellerProfile(Base):
     )
     bio: Mapped[str | None] = mapped_column(Text)
     production_description: Mapped[str | None] = mapped_column(Text)
-    waste_categories: Mapped[list[str]] = mapped_column(ARRAY(String), default=list)
+    waste_categories: Mapped[list[str]] = mapped_column(
+        ARRAY(String), default=list
+    )
     avg_response_hrs: Mapped[float] = mapped_column(Numeric(6, 2), default=0)
     completion_rate: Mapped[float] = mapped_column(Numeric(5, 2), default=0)
     total_kg_sold: Mapped[float] = mapped_column(Numeric(14, 2), default=0)
@@ -88,13 +90,15 @@ class BuyerProfile(Base):
     id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
     )
-    user_id: Mapped[uuid.UUID] = mapped_column(          # ← ADD THIS
+    user_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey('users.id', ondelete='CASCADE'),
         unique=True,
         nullable=False,
     )
-    preferred_categories: Mapped[list[str] | None] = mapped_column(ARRAY(String), default=list)
+    preferred_categories: Mapped[list[str] | None] = mapped_column(
+        ARRAY(String), default=list
+    )
     preferred_location: Mapped[str | None] = mapped_column(String(100))
     ai_pref_vector: Mapped[dict | None] = mapped_column(JSON)
     last_search_at: Mapped[str | None] = mapped_column(String)
