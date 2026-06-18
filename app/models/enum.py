@@ -142,3 +142,13 @@ class NigerianStates(str, enum.Enum):
     TARABA = "Taraba"
     YOBE = "Yobe"
     ZAMFARA = "Zamfara"
+
+class ProfileStatus(str, enum.Enum):
+    """
+    Profile Statuses for Seller and Buyer Profiles
+    """
+
+    INCOMPLETE = "incomplete"
+    PENDING_VERIFICATION = "pending_verification"
+    ACTIVE = "active"
+    INACTIVE = "inactive"

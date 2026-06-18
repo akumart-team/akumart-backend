@@ -8,7 +8,11 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.core.database import Base
 from app.models.base import TimestampMixin
-from app.models.enum import UserRole, NigerianStates
+from app.models.enum import (
+    UserRole,
+    NigerianStates,
+    ProfileStatus
+)
 
 
 class User(Base, TimestampMixin):
@@ -20,7 +24,14 @@ class User(Base, TimestampMixin):
     id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
     )
-    role: Mapped[UserRole] = mapped_column(String(20), nullable=False)
+    active_role: Mapped[UserRole | None] = mapped_column(
+        String(20), nullable=True
+    )
+    registered_roles: Mapped[list[str]] = mapped_column(
+        ARRAY(String),
+        default=list,
+        server_default='{}'
+    )
     first_name: Mapped[str] = mapped_column(String(50), nullable=False)
     last_name: Mapped[str] = mapped_column(String(50), nullable=False)
     email: Mapped[str] = mapped_column(
@@ -62,6 +73,11 @@ class SellerProfile(Base):
         unique=True,
         nullable=False,
     )
+    profile_status: Mapped[ProfileStatus] = mapped_column(
+        String(30),
+        default=ProfileStatus.INCOMPLETE,
+        nullable=False
+    )
     bio: Mapped[str | None] = mapped_column(Text)
     production_description: Mapped[str | None] = mapped_column(Text)
     waste_categories: Mapped[list[str]] = mapped_column(
@@ -95,6 +111,11 @@ class BuyerProfile(Base):
         ForeignKey('users.id', ondelete='CASCADE'),
         unique=True,
         nullable=False,
+    )
+    profile_status: Mapped[ProfileStatus] = mapped_column(
+        String(30),
+        default=ProfileStatus.INCOMPLETE,
+        nullable=False
     )
     preferred_categories: Mapped[list[str] | None] = mapped_column(
         ARRAY(String), default=list

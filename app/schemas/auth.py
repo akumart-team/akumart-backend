@@ -20,7 +20,6 @@ class RegisterRequest(AkumartSchema):
     created exclusively through the admin panel.
     """
 
-    role: UserRole = Field(..., description="Must be 'buyer' or 'seller'.")
     first_name: str = Field(..., min_length=1, max_length=50)
     last_name: str = Field(..., min_length=1, max_length=50)
     email: EmailStr
