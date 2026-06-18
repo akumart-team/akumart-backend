@@ -39,5 +39,16 @@ class Settings(BaseSettings):
     # Misc
     CORS_ORIGINS: list[str] = ["*"]
 
+    # Redis
+    REDIS_URL: str = "redis://localhost:6379/0"
+
+    # Email service
+    MAIL_USERNAME: str
+    MAIL_PASSWORD: str
+    MAIL_FROM: str
+    MAIL_PORT: int = 587
+    MAIL_SERVER: str = "smtp.gmail.com"
+    MAIL_FROM_NAME: str = "AkuMart"
+
 
 settings = Settings()

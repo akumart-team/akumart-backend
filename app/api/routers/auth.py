@@ -1,13 +1,15 @@
 """
-Authentication enpoints for the AkuMart platform.
+Authentication endpoints for the AkuMart platform.
 
 Routes
 ------
-POST /auth/register   — create account, auto-login, return token pair
-POST /auth/login      — verify credentials, return token pair
-POST /auth/refresh    — exchange refresh token for a new pair
-POST /auth/logout     — invalidate refresh token
-GET  /auth/me         — return the authenticated user's own profile
+POST /auth/register     — create account, dispatch OTP
+POST /auth/verify-otp   — verify email OTP, return token pair
+POST /auth/resend-otp   — resend OTP to email
+POST /auth/login        — verify credentials, return token pair
+POST /auth/refresh      — exchange refresh token for a new pair
+POST /auth/logout       — invalidate refresh token
+GET  /auth/me           — return the authenticated user's own profile
 """
 
 from typing import Annotated
@@ -18,15 +20,17 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.deps import CurrentUser, get_db
 from app.schemas.auth import (
     LoginRequest,
-    LogoutRequest,
     LoginResponse,
+    LogoutRequest,
+    MessageResponse,
     RegisterRequest,
     RegisterResponse,
+    ResendOTPRequest,
     TokenRefreshRequest,
     TokenRefreshResponse,
-    MessageResponse,
+    VerifyOTPRequest,
+    VerifyOTPResponse,
 )
-
 from app.schemas.user import UserOut
 from app.services import auth as auth_service
 
@@ -39,7 +43,7 @@ DBSession = Annotated[AsyncSession, Depends(get_db)]
     "/register",
     response_model=RegisterResponse,
     status_code=status.HTTP_201_CREATED,
-    summary="Register a new buyer or seller account",
+    summary="Register a new account",
 )
 async def register(
     payload: RegisterRequest,
@@ -51,12 +55,46 @@ async def register(
     - Validates uniqueness of e-mail and phone.
     - Enforces password strength policy (digit + uppercase).
     - Hashes password with bcrypt before persistence.
-    - Creates the matching sub-profile (BuyerProfile or SellerProfile).
-    - Returns user object + token pair so the client is immediately
-      authenticated after registration.
+    - Dispatches a 6-digit OTP to the provided email.
+    - No tokens issued yet — client must verify email first.
     """
-    _user, response = await auth_service.register_user(payload, db)
-    return response
+    return await auth_service.register_user(payload, db)
+
+
+@router.post(
+    "/verify-otp",
+    response_model=VerifyOTPResponse,
+    summary="Verify email with OTP code",
+)
+async def verify_otp(
+    payload: VerifyOTPRequest,
+    db: DBSession,
+) -> VerifyOTPResponse:
+    """
+    Validate the OTP sent to the user's email.
+
+    - Activates the account on success.
+    - Returns a token pair with active_role=None.
+    - Client must proceed to /auth/select-role next.
+    """
+    return await auth_service.verify_otp_and_activate(payload, db)
+
+
+@router.post(
+    "/resend-otp",
+    response_model=MessageResponse,
+    summary="Resend OTP verification code",
+)
+async def resend_otp(
+    payload: ResendOTPRequest,
+    db: DBSession,
+) -> MessageResponse:
+    """
+    Generate and resend a fresh OTP to the user's email.
+
+    Rate limited to 3 resends per hour per user.
+    """
+    return await auth_service.resend_otp(payload, db)
 
 
 @router.post(
@@ -90,7 +128,7 @@ async def refresh(
     Exchange a refresh token for a new access + refresh token pair.
 
     Uses a rotating refresh-token strategy — the submitted token is
-    consumed and must not be reused. Store the new pair returned.
+    consumed and must not be reused.
     """
     return await auth_service.refresh_tokens(payload, db)
 
@@ -102,7 +140,7 @@ async def refresh(
 )
 async def logout(
     payload: LogoutRequest,
-    _db: DBSession,  # noqa: ARG001  — reserved for Phase 4 deny-list writes
+    _db: DBSession,
 ) -> MessageResponse:
     """
     Revoke the supplied refresh token.
@@ -123,9 +161,7 @@ async def me(
     current_user: CurrentUser,
 ) -> UserOut:
     """
-    Return the full profile of the authenticated user, including the
-    role-specific sub-profile (seller or buyer) where available.
-
-    Sub-profiles are loaded eagerly by the ``get_current_user`` dependency.
+    Return the full profile of the authenticated user, including
+    sub-profiles where available.
     """
     return UserOut.model_validate(current_user)

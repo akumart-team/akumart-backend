@@ -14,7 +14,10 @@ select = [
     "B",   # flake8-bugbear
     "UP",  # pyupgrade
 ]
-ignore = ["E501"]  # ignore line too long if you prefer
+ignore = ["E501"]
 
 [tool.ruff.format]
-quote-style = "single"  # match your current style
+quote-style = "single"
+
+[tool.pylint.typecheck]
+ignored-modules = ["redis", "redis.asyncio"]

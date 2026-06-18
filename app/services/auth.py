@@ -25,8 +25,14 @@ from app.core.security import (
     hash_password,
     verify_password,
 )
-from app.models.enum import UserRole
-from app.models.user import BuyerProfile, SellerProfile, User
+from app.core.otp import (
+    generate_otp,
+    store_otp,
+    verify_otp as check_otp,
+    check_resend_rate_limit
+)
+from app.core.email import send_verification_email
+from app.models.user import User
 from app.schemas.auth import (
     LoginRequest,
     LogoutRequest,
@@ -34,18 +40,19 @@ from app.schemas.auth import (
     RegisterRequest,
     RegisterResponse,
     LoginResponse,
-    TokenRefreshResponse
+    TokenRefreshResponse,
+    VerifyOTPRequest,
+    VerifyOTPResponse,
+    MessageResponse,
+    ResendOTPRequest
 )
 from app.schemas.user import UserOut
 
 
 # Helpers
-def _make_tokens(user_id: uuid.UUID, role: UserRole) -> tuple[str, str]:
-    """
-    Return ``(access_token, refresh_token)`` for the given user.
-    """
+def _make_tokens(user_id: uuid.UUID, active_role: str | None) -> tuple[str, str]:
     uid = str(user_id)
-    role_val = role.value
+    role_val = active_role or ""
     return (
         create_access_token(uid, role_val),
         create_refresh_token(uid, role_val),
@@ -77,22 +84,8 @@ async def register_user(
     db: AsyncSession,
 ) -> tuple[User, RegisterResponse]:
     """
-    Create a new user account and its role-specific sub-profile.
-
-    Steps
-    -----
-    1. Guard against duplicate e-mail and phone.
-    2. Hash the plaintext password.
-    3. Persist the ``User`` row and flush to obtain its PK.
-    4. Create the matching ``BuyerProfile`` or ``SellerProfile``.
-    5. Reload the user with sub-profiles eagerly loaded.
-    6. Build and return the ``RegisterResponse``.
-
-    Raises
-    ------
-    HTTP 409  — e-mail or phone already registered.
+    Create a new user account
     """
-    # 1. Duplicate e-mail check
     dup_email = await db.execute(
         select(User).where(User.email == payload.email)
     )
@@ -102,7 +95,6 @@ async def register_user(
             detail="An account with this email address already exists.",
         )
 
-    # 1. Duplicate phone check
     dup_phone = await db.execute(
         select(User).where(User.phone == payload.phone)
     )
@@ -112,9 +104,7 @@ async def register_user(
             detail="An account with this phone number already exists.",
         )
 
-    # 2-3. Create and persist the User row
     user = User(
-        role=payload.role,
         first_name=payload.first_name,
         last_name=payload.last_name,
         email=payload.email,
@@ -125,34 +115,122 @@ async def register_user(
         state=payload.state,
         city=payload.city,
         address=payload.address,
+        active_role=None,
+        registered_roles=[],
     )
     db.add(user)
-    await db.flush()  # populate user.id before the FK on the sub-profile
-
-    # 4. Role-specific sub-profile
-    if payload.role == UserRole.SELLER:
-        db.add(SellerProfile(id=uuid.uuid4(), user=user))
-    else:
-        db.add(BuyerProfile(id=uuid.uuid4(), user=user))
+    await db.flush()
 
     await db.commit()
 
-    # 5. Reload with relationships populated
-    refreshed = await _fetch_user_with_profiles(db, user.id)
-    if refreshed is None:  # should never happen
+    otp = generate_otp()
+    await store_otp(str(user.id), otp)
+    await send_verification_email(user.email, otp)
+
+    return RegisterResponse(user_id=user.id)
+
+
+async def verify_otp_and_activate(
+    payload: VerifyOTPRequest,
+    db: AsyncSession,
+) -> VerifyOTPResponse:
+    """
+    Validate the OTP submitted by the user and activate their account.
+
+    Steps
+    -----
+    1. Load the user row.
+    2. Guard against already-verified accounts.
+    3. Validate the OTP against Redis.
+    4. Flip is_verified = True and commit.
+    5. Issue tokens with active_role=None (role selection comes next).
+    6. Return VerifyOTPResponse.
+
+    Raises
+    ------
+    HTTP 404  — user not found.
+    HTTP 409  — account already verified.
+    HTTP 400  — invalid or expired OTP.
+    """
+    # 1. Load user
+    user = await _fetch_user_with_profiles(db, payload.user_id)
+    if user is None:
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="User created but could not be retrieved.",
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found.",
         )
 
-    # 6. Build response
-    access_token, refresh_token = _make_tokens(refreshed.id, refreshed.role)
-    response = RegisterResponse(
-        user=UserOut.model_validate(refreshed),
+    # 2. Already verified guard
+    if user.is_verified:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="This account is already verified.",
+        )
+
+    # 3. Validate OTP
+    is_valid = await check_otp(str(user.id), payload.otp)
+    if not is_valid:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid or expired verification code.",
+        )
+
+    # 4. Activate account
+    user.is_verified = True
+    await db.commit()
+    await db.refresh(user)
+
+    # 5. Issue tokens — active_role is None until role selection
+    access_token, refresh_token = _make_tokens(user.id, user.active_role)
+
+    # 6. Return response
+    return VerifyOTPResponse(
+        user=UserOut.model_validate(user),
         access_token=access_token,
         refresh_token=refresh_token,
     )
-    return refreshed, response
+
+
+async def resend_otp(
+    payload: ResendOTPRequest,
+    db: AsyncSession,
+) -> MessageResponse:
+    """
+    Generate and resend a fresh OTP to the user's email.
+
+    Raises
+    ------
+    HTTP 404  — user not found.
+    HTTP 409  — account already verified.
+    HTTP 429  — resend limit exceeded (3 per hour).
+    """
+    result = await db.execute(select(User).where(User.id == payload.user_id))
+    user: User | None = result.scalar_one_or_none()
+
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found.",
+        )
+
+    if user.is_verified:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="This account is already verified.",
+        )
+
+    allowed = await check_resend_rate_limit(str(user.id))
+    if not allowed:
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail="Too many resend attempts. Please wait before trying again.",
+        )
+
+    otp = generate_otp()
+    await store_otp(str(user.id), otp)
+    await send_verification_email(user.email, otp)
+
+    return MessageResponse(message="Verification code resent. Check your email.")
 
 
 async def login_user(
@@ -181,13 +259,10 @@ async def login_user(
     ):
         raise _bad_creds
 
-    if not user.is_active:
+    if not user.is_verified:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail=(
-                "This account has been deactivated."
-                "Please contact support."
-            ),
+            detail="Please verify your email before logging in.",
         )
 
     # Reload with sub-profiles so UserOut serialises correctly
@@ -195,7 +270,7 @@ async def login_user(
     if full_user is None:
         raise _bad_creds
 
-    access_token, refresh_token = _make_tokens(full_user.id, full_user.role)
+    access_token, refresh_token = _make_tokens(full_user.id, full_user.active_role)
     return LoginResponse(
         access_token=access_token,
         refresh_token=refresh_token,

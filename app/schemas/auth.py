@@ -1,7 +1,6 @@
-""".
-Pydantic request/response schemas for authentication flows.
-"""
+"""Pydantic request/response schemas for authentication flows."""
 
+import uuid
 from typing import Literal
 from pydantic import EmailStr, Field, field_validator
 
@@ -13,8 +12,8 @@ from app.schemas.user import UserOut
 # Registration
 
 class RegisterRequest(AkumartSchema):
-    """
-    Body schema for ``POST /auth/register``.
+    """Body schema for ``POST /auth/register``.
+
     Payload for new account creation.
     Accepted for both buyer and seller roles — admin accounts are
     created exclusively through the admin panel.
@@ -42,8 +41,8 @@ class RegisterRequest(AkumartSchema):
     @field_validator("password")
     @classmethod
     def validate_password_strength(cls, value: str) -> str:
-        """
-        Enforce minimal password policy:
+        """Enforce minimal password policy:
+
         - At least one digit
         - At least one uppercase letter
         """
@@ -58,49 +57,37 @@ class RegisterRequest(AkumartSchema):
     @field_validator("first_name", "last_name", mode="before")
     @classmethod
     def strip_name(cls, v: str) -> str:
-        """
-        Strip surrounding whitespace from name fields
-        """
-
+        """Strip surrounding whitespace from name fields."""
         return v.strip()
 
     @field_validator("email", mode="before")
     @classmethod
     def normalise_email(cls, v: str) -> str:
         """Lowercase the e-mail so lookups are case-insensitive."""
-
         return v.strip().lower()
 
     @field_validator("phone", mode="before")
     @classmethod
     def strip_phone(cls, v: str) -> str:
-        """
-        Remove stray spaces from phone numbers
-        """
-
+        """Remove stray spaces from phone numbers."""
         return v.strip()
 
 
 class RegisterResponse(AkumartSchema):
-    """
-    Returned after successful registration.
+    """Returned after successful registration.
+
     Tokens are issued immediately so the client can proceed without
     a separate login step.
     """
 
-    message: str = "Registration successful."
-    user: UserOut
-    access_token: str
-    refresh_token: str
-    token_type: str = "bearer"
+    message: str = "Registration successful. Check your email for a verification code."
+    user_id: uuid.UUID
 
 
 # Login
 
 class LoginRequest(AkumartSchema):
-    """
-    Standard email + password credential payload.
-    """
+    """Standard email + password credential payload."""
 
     email: EmailStr
     password: str = Field(..., min_length=1)
@@ -108,17 +95,12 @@ class LoginRequest(AkumartSchema):
     @field_validator("email", mode="before")
     @classmethod
     def normalise_email(cls, v: str) -> str:
-        """
-        Lowercase the e-mail to match stored value
-        """
-
+        """Lowercase the e-mail to match stored value."""
         return v.strip().lower()
 
 
 class LoginResponse(AkumartSchema):
-    """
-    Returned after successful credential verification.
-    """
+    """Returned after successful credential verification."""
 
     access_token: str
     refresh_token: str
@@ -127,8 +109,8 @@ class LoginResponse(AkumartSchema):
 
 
 class LogoutRequest(AkumartSchema):
-    """
-    Body schema for ``POST /auth/logout``.
+    """Body schema for ``POST /auth/logout``.
+
     The refresh token is accepted so the server can invalidate it.
     """
 
@@ -138,16 +120,14 @@ class LogoutRequest(AkumartSchema):
 # Token refresh
 
 class TokenRefreshRequest(AkumartSchema):
-    """
-    Payload carrying the long-lived refresh token.
-    """
+    """Payload carrying the long-lived refresh token."""
 
     refresh_token: str = Field(..., min_length=1)
 
 
 class TokenRefreshResponse(AkumartSchema):
-    """
-    Returned after a valid refresh — issues a new access token.
+    """Returned after a valid refresh — issues a new access token.
+
     The refresh token itself is rotated on each use.
     """
 
@@ -158,17 +138,15 @@ class TokenRefreshResponse(AkumartSchema):
 
 # General message response for authentication requests
 class MessageResponse(AkumartSchema):
-    """
-    Generic single-field response for operations that have no domain payload.
-    """
+    """Generic single-field response for operations that have no domain payload."""
 
     message: str
 
 
 # Internal token payload (not an API schema — used by JWT helpers)
 class TokenPayload(AkumartSchema):
-    """
-    Claims embedded in both access and refresh JWTs.
+    """Claims embedded in both access and refresh JWTs.
+
     `sub` holds the user UUID as a string.
     `type` distinguishes access from refresh tokens.
     """
@@ -178,3 +156,27 @@ class TokenPayload(AkumartSchema):
     type: Literal["access", "refresh"]
     iat: int
     exp: int
+
+
+# Verification Schemas
+
+class VerifyOTPRequest(AkumartSchema):
+    """Body schema for verifying a user's email via an OTP code."""
+
+    user_id: uuid.UUID
+    otp: str = Field(..., min_length=6, max_length=6)
+
+
+class VerifyOTPResponse(AkumartSchema):
+    """Returned after successful OTP verification, providing valid session tokens."""
+
+    message: str = "Email verified."
+    user: UserOut
+    access_token: str
+    refresh_token: str
+    token_type: str = "bearer"
+
+class ResendOTPRequest(AkumartSchema):
+    """Body schema for ``POST /auth/resend-otp/``."""
+
+    user_id: uuid.UUID
