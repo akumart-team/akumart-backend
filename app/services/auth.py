@@ -44,7 +44,9 @@ from app.schemas.auth import (
     VerifyOTPRequest,
     VerifyOTPResponse,
     MessageResponse,
-    ResendOTPRequest
+    ResendOTPRequest,
+    SelectRoleRequest,
+    SelectRoleResponse
 )
 from app.schemas.user import UserOut
 
@@ -232,6 +234,61 @@ async def resend_otp(
 
     return MessageResponse(message="Verification code resent. Check your email.")
 
+
+async def select_role(
+    payload: SelectRoleRequest,
+    current_user: User,
+    db: AsyncSession,
+) -> SelectRoleResponse:
+    """
+    Assign an active role to a freshly verified user.
+
+    Steps
+    -----
+    1. Guard — user must be verified.
+    2. Guard — role must not already be set (use switch-role for that).
+    3. Set active_role and registered_roles.
+    4. Commit and reload.
+    5. Reissue tokens with active_role embedded.
+    6. Return SelectRoleResponse.
+
+    Raises
+    ------
+    HTTP 403  — account not yet verified.
+    HTTP 409  — active_role already set.
+    """
+    # 1. Verified guard
+    if not current_user.is_verified:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Verify your email before selecting a role.",
+        )
+
+    # 2. Role already set guard
+    if current_user.active_role is not None:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Role already selected. Use /auth/switch-role to change roles.",
+        )
+
+    # 3. Apply role
+    current_user.active_role = payload.role.value
+    current_user.registered_roles = [payload.role.value]
+    await db.commit()
+
+    # 4. Reload with profiles
+    refreshed = await _fetch_user_with_profiles(db, current_user.id)
+
+    # 5. Reissue tokens with active_role embedded
+    access_token, refresh_token = _make_tokens(refreshed.id, refreshed.active_role)
+
+    # 6. Return response
+    return SelectRoleResponse(
+        active_role=refreshed.active_role,
+        user=UserOut.model_validate(refreshed),
+        access_token=access_token,
+        refresh_token=refresh_token,
+    )
 
 async def login_user(
     payload: LoginRequest,

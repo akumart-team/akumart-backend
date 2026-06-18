@@ -180,3 +180,21 @@ class ResendOTPRequest(AkumartSchema):
     """Body schema for ``POST /auth/resend-otp/``."""
 
     user_id: uuid.UUID
+
+class SelectRoleRequest(AkumartSchema):
+    """
+    Body schema for ``POST /auth/select-role``.
+    """
+
+    role: UserRole
+
+
+class SelectRoleResponse(AkumartSchema):
+    """Returned after successful role selection."""
+
+    message: str = "Role selected successfully."
+    active_role: UserRole
+    user: UserOut
+    access_token: str
+    refresh_token: str
+    token_type: str = "bearer"

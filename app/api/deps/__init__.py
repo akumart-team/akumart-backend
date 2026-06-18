@@ -3,11 +3,12 @@ app/api/deps/__init__.py
 FastAPI dependency injection layer.
 
 Provides:
-  - get_db             -> AsyncSession for each request
-  - get_current_user   -> authenticated User ORM instance
-  - require_buyer      -> role guard: buyers only
-  - require_seller     -> role guard: sellers only
-  - require_admin      -> role guard: admins only
+  - get_db                -> AsyncSession for each request
+  - get_current_user      -> authenticated User ORM instance
+  - require_buyer         -> role guard: active_role == buyer
+  - require_seller        -> role guard: active_role == seller
+  - require_admin         -> role guard: active_role == admin
+  - require_active_profile -> marketplace guard
 """
 
 import uuid
@@ -23,7 +24,7 @@ from sqlalchemy.orm import selectinload
 
 from app.core.database import async_session_local
 from app.core.security import decode_token
-from app.models.enum import UserRole
+from app.models.enum import ProfileStatus, UserRole
 from app.models.user import User
 
 
@@ -35,10 +36,7 @@ _bearer = HTTPBearer(auto_error=False)
 # Database session
 
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
-    """
-    Yield a single AsyncSession per request, then close it.
-    Use as: `db: AsyncSession = Depends(get_db)`
-    """
+    """Yield a single AsyncSession per request, then close it."""
     async with async_session_local() as session:
         yield session
 
@@ -55,6 +53,7 @@ async def get_current_user(
     Decode the Bearer JWT, look up the user in the database, and return
     the ORM instance with both sub-profiles eagerly loaded.
 
+    Does NOT enforce active_role — that is handled by role guards.
     Raises HTTP 401 on any authentication failure.
     """
     _unauthorized = HTTPException(
@@ -72,7 +71,6 @@ async def get_current_user(
         raise _unauthorized from exc
 
     if payload.type != "access":
-        # Prevent refresh tokens from being used as access tokens.
         raise _unauthorized
 
     try:
@@ -96,21 +94,21 @@ async def get_current_user(
     return user
 
 
-# Convenience type aliases
+# Convenience type alias
 
 CurrentUser = Annotated[User, Depends(get_current_user)]
 
 
 # Role guards
 
-def _require_role(role: UserRole):
+def _require_active_role(role: UserRole):
     """
-    Internal factory — returns a dependency that asserts the current
-    user has the expected role, raising HTTP 403 otherwise.
+    Factory — returns a dependency that asserts the user's active_role
+    matches the expected role, raising HTTP 403 otherwise.
     """
 
     async def _guard(user: CurrentUser) -> User:
-        if user.role != role:
+        if user.active_role != role.value:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail=f"Access restricted to {role.value}s.",
@@ -120,29 +118,76 @@ def _require_role(role: UserRole):
     return _guard
 
 
+def _require_admin_role():
+    """Separate factory for admin since it uses UserRole"""
+
+    async def _guard(user: CurrentUser) -> User:
+        if user.active_role != UserRole.ADMIN.value:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Access restricted to admins.",
+            )
+        return user
+
+    return _guard
+
+
 async def require_buyer(
-    user: Annotated[User, Depends(_require_role(UserRole.BUYER))]
+    user: Annotated[User, Depends(_require_active_role(UserRole.BUYER))]
 ) -> User:
-    """Dependency — resolves only for authenticated buyers."""
+    """Dependency — resolves only when active_role == buyer."""
     return user
 
 
 async def require_seller(
-    user: Annotated[User, Depends(_require_role(UserRole.SELLER))]
+    user: Annotated[User, Depends(_require_active_role(UserRole.SELLER))]
 ) -> User:
-    """Dependency — resolves only for authenticated sellers."""
+    """Dependency — resolves only when active_role == seller."""
     return user
 
 
 async def require_admin(
-    user: Annotated[User, Depends(_require_role(UserRole.ADMIN))]
+    user: Annotated[User, Depends(_require_admin_role())]
 ) -> User:
-    """Dependency — resolves only for authenticated admins."""
+    """Dependency — resolves only when active_role == admin."""
     return user
 
 
-# Annotated shorthand aliases (use these in route signatures)
+# Marketplace access guard
 
+async def require_active_profile(user: CurrentUser) -> User:
+    """
+    Dependency — resolves only when the user's active profile
+    has been verified and set to active by an admin.
+
+    Used on all marketplace endpoints (listings, offers, search).
+    Raises HTTP 403 if profile is incomplete or pending verification.
+    """
+    if user.active_role is None:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Select a role before accessing the marketplace.",
+        )
+
+    profile = (
+        user.seller_profile
+        if user.active_role == UserRole.SELLER.value
+        else user.buyer_profile
+    )
+
+    if profile is None or profile.profile_status != ProfileStatus.ACTIVE:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Complete and verify your profile before accessing the marketplace.",
+        )
+
+    return user
+
+
+# Annotated shorthand aliases
+
+CurrentUser = Annotated[User, Depends(get_current_user)]
 BuyerUser = Annotated[User, Depends(require_buyer)]
 SellerUser = Annotated[User, Depends(require_seller)]
 AdminUser = Annotated[User, Depends(require_admin)]
+MarketplaceUser = Annotated[User, Depends(require_active_profile)]

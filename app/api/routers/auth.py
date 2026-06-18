@@ -30,6 +30,8 @@ from app.schemas.auth import (
     TokenRefreshResponse,
     VerifyOTPRequest,
     VerifyOTPResponse,
+    SelectRoleRequest,
+    SelectRoleResponse
 )
 from app.schemas.user import UserOut
 from app.services import auth as auth_service
@@ -165,3 +167,22 @@ async def me(
     sub-profiles where available.
     """
     return UserOut.model_validate(current_user)
+
+@router.post(
+    "/select-role",
+    response_model=SelectRoleResponse,
+    summary="Select buyer or seller role after email verification",
+)
+async def select_role(
+    payload: SelectRoleRequest,
+    current_user: CurrentUser,
+    db: DBSession,
+) -> SelectRoleResponse:
+    """
+    Assign active_role to a verified account.
+
+    - Only callable once — role is None at this point.
+    - Reissues JWT with active_role embedded.
+    - Client proceeds to profile setup after this.
+    """
+    return await auth_service.select_role(payload, current_user, db)
