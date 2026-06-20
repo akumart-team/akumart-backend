@@ -14,7 +14,7 @@ GET  /auth/me           — return the authenticated user's own profile
 
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import CurrentUser, get_db
@@ -240,3 +240,34 @@ async def post_switch_role(
     Allow Users switch roles from buyer to seller and vice versa
     """
     return await profile_service.switch_role(payload, current_user, db)
+
+@router.get("/me/seller_profile", response_model=SellerProfileOut)
+async def get_seller_profile(
+    current_user: CurrentUser,
+):
+    """
+    Return the authenticated user's seller profile, regardless of
+    its status — lets the user see INCOMPLETE or PENDING_VERIFICATION
+    state to know what's left to do.
+    """
+    if current_user.seller_profile is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No seller profile found. Start profile setup with PATCH /auth/me/seller_profile.",
+        )
+    return current_user.seller_profile
+
+
+@router.get("/me/buyer_profile", response_model=BuyerProfileOut)
+async def get_buyer_profile(
+    current_user: CurrentUser,
+):
+    """
+    Return the authenticated user's buyer profile, regardless of status.
+    """
+    if current_user.buyer_profile is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No buyer profile found. Start profile setup with PATCH /auth/me/buyer_profile.",
+        )
+    return current_user.buyer_profile
