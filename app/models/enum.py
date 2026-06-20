@@ -15,6 +15,13 @@ class UserRole(str, enum.Enum):
     ADMIN = 'admin'
 
 
+class ActiveRole(str, enum.Enum):
+    """Customer profiles"""
+
+    BUYER = 'buyer'
+    SELLER = 'seller'
+
+
 class OrderStatus(str, enum.Enum):
     """
     The lifecycle states of a marketplace transaction/order.

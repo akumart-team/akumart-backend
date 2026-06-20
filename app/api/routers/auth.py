@@ -33,8 +33,17 @@ from app.schemas.auth import (
     SelectRoleRequest,
     SelectRoleResponse
 )
-from app.schemas.user import UserOut
-from app.services import auth as auth_service
+from app.schemas.user import (
+    UserOut,
+    SellerProfileOut,
+    SellerProfileUpdate,
+    BuyerProfileOut,
+    BuyerProfileUpdate,
+)
+from app.services import (
+    auth as auth_service,
+    profile as profile_service
+)
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
@@ -185,4 +194,36 @@ async def select_role(
     - Reissues JWT with active_role embedded.
     - Client proceeds to profile setup after this.
     """
+
     return await auth_service.select_role(payload, current_user, db)
+
+@router.patch("/me/seller_profile", response_model=SellerProfileOut)
+async def patch_seller_profile(
+    payload: SellerProfileUpdate,
+    current_user: CurrentUser,
+    db: DBSession,
+):
+    """
+    Route registered user to complete buyer account.
+    """
+
+    profile = await profile_service.update_seller_profile(
+        payload, current_user, db
+    )
+    return profile
+
+
+@router.patch("/me/buyer_profile", response_model=BuyerProfileOut)
+async def patch_buyer_profile(
+    payload: BuyerProfileUpdate,
+    current_user: CurrentUser,
+    db: DBSession,
+):
+    """
+    Route registered user to complete buyer account.
+    """
+
+    profile = await profile_service.update_buyer_profile(
+        payload, current_user, db
+    )
+    return profile

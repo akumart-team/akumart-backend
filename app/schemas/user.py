@@ -8,7 +8,12 @@ from typing import Optional
 
 from pydantic import EmailStr, Field
 
-from app.models.enum import UserRole, WasteCategories, NigerianStates
+from app.models.enum import (
+    ActiveRole,
+    WasteCategories,
+    NigerianStates,
+    ProfileStatus,
+)
 from app.schemas.base import AkumartSchema
 
 
@@ -21,6 +26,7 @@ class SellerProfileOut(AkumartSchema):
 
     id: uuid.UUID
     bio: Optional[str] = None
+    profile_status: ProfileStatus
     production_description: Optional[str] = None
     waste_categories: list[WasteCategories] = Field(default_factory=list)
     avg_response_hrs: float = 0.0
@@ -57,6 +63,7 @@ class BuyerProfileOut(AkumartSchema):
     preferred_categories: Optional[list[WasteCategories]] = None
     preferred_location: Optional[str] = None
     last_search_at: Optional[str] = None
+    profile_status: ProfileStatus
     # ai_pref_vector is an internal embedding — excluded from API output.
 
 
@@ -77,7 +84,8 @@ class UserBase(AkumartSchema):
     """
 
     id: uuid.UUID
-    role: UserRole
+    active_role: Optional[ActiveRole] = None
+    registered_roles: list[str] = Field(default_factory=list)
     first_name: str
     last_name: str
     email: EmailStr

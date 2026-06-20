@@ -9,7 +9,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.core.database import Base
 from app.models.base import TimestampMixin
 from app.models.enum import (
-    UserRole,
+    ActiveRole,
     NigerianStates,
     ProfileStatus
 )
@@ -24,7 +24,7 @@ class User(Base, TimestampMixin):
     id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
     )
-    active_role: Mapped[UserRole | None] = mapped_column(
+    active_role: Mapped[ActiveRole | None] = mapped_column(
         String(20), nullable=True
     )
     registered_roles: Mapped[list[str]] = mapped_column(
