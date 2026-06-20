@@ -153,6 +153,8 @@ class TokenPayload(AkumartSchema):
 
     sub: str
     role: str
+    active_role: str | None
+    registered_roles: list[str]
     type: Literal["access", "refresh"]
     iat: int
     exp: int

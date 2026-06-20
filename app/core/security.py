@@ -33,7 +33,8 @@ def verify_password(plain: str, hashed: str) -> bool:
 
 def _make_token(
     subject: str,
-    role: str,
+    active_role: str | None,
+    registered_roles: list[str],
     token_type: Literal["access", "refresh"],
     expires_delta: timedelta,
 ) -> str:
@@ -45,39 +46,57 @@ def _make_token(
 
     payload: dict = {
         "sub": subject,
-        "role": role,
+        "active_role": active_role,
+        "registered_roles": registered_roles,
         "type": token_type,
         "iat": int(now.timestamp()),
         "exp": int(expire.timestamp()),
     }
     return jwt.encode(
-        payload, settings.SECRET_KEY, algorithm=settings.JWT_ALGORITHM
+        payload,
+        settings.SECRET_KEY,
+        algorithm=settings.JWT_ALGORITHM
     )
 
 
-def create_access_token(user_id: str, role: str) -> str:
+def create_access_token(
+    user_id: str,
+    active_role: str | None,
+    registered_roles: list[str]
+) -> str:
     """
     Issue a short-lived JWT access token.
     Lifetime is controlled by ACCESS_TOKEN_EXPIRE_MINUTES in settings.
     """
+
     return _make_token(
         subject=user_id,
-        role=role,
+        active_role=active_role,
+        registered_roles=registered_roles,
         token_type="access",
-        expires_delta=timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES),
+        expires_delta=timedelta(
+            minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
+        ),
     )
 
 
-def create_refresh_token(user_id: str, role: str) -> str:
+def create_refresh_token(
+    user_id: str,
+    active_role: str | None,
+    registered_roles: list[str],
+) -> str:
     """
     Issue a long-lived JWT refresh token.
     Lifetime is controlled by REFRESH_TOKEN_EXPIRE_DAYS in settings.
     """
     return _make_token(
         subject=user_id,
-        role=role,
+        active_role=active_role,
+        registered_roles=registered_roles,
         token_type="refresh",
-        expires_delta=timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS),
+        expires_delta=timedelta(
+            days=settings.REFRESH_TOKEN_EXPIRE_DAYS
+        ),
     )
 
 

@@ -94,11 +94,6 @@ async def get_current_user(
     return user
 
 
-# Convenience type alias
-
-CurrentUser = Annotated[User, Depends(get_current_user)]
-
-
 # Role guards
 
 def _require_active_role(role: UserRole):
@@ -185,7 +180,6 @@ async def require_active_profile(user: CurrentUser) -> User:
 
 
 # Annotated shorthand aliases
-
 CurrentUser = Annotated[User, Depends(get_current_user)]
 BuyerUser = Annotated[User, Depends(require_buyer)]
 SellerUser = Annotated[User, Depends(require_seller)]

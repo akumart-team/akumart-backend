@@ -4,7 +4,7 @@ Authentication business logic for the AkuMart platform.
 All database I/O and token operations live here; routers stay thin.
 
 Public surface:
-  - register_user   -> (User, TokenResponse)
+  - register_user   -> RegisterResponse
   - login_user      -> TokenResponse
   - refresh_tokens  -> TokenResponse
   - logout_user     -> None   (no-op in stateless mode; extend for deny-list)
@@ -52,12 +52,20 @@ from app.schemas.user import UserOut
 
 
 # Helpers
-def _make_tokens(user_id: uuid.UUID, active_role: str | None) -> tuple[str, str]:
+def _make_tokens(
+    user_id: uuid.UUID,
+    active_role: str | None,
+    registered_roles: list[str],
+) -> tuple[str, str]:
+    """
+    Return ``(access_token, refresh_token)`` for the given user.
+    """
+
     uid = str(user_id)
-    role_val = active_role or ""
+
     return (
-        create_access_token(uid, role_val),
-        create_refresh_token(uid, role_val),
+        create_access_token(uid, active_role, registered_roles),
+        create_refresh_token(uid, active_role, registered_roles),
     )
 
 
@@ -84,7 +92,7 @@ async def _fetch_user_with_profiles(
 async def register_user(
     payload: RegisterRequest,
     db: AsyncSession,
-) -> tuple[User, RegisterResponse]:
+) -> RegisterResponse:
     """
     Create a new user account
     """
@@ -183,7 +191,11 @@ async def verify_otp_and_activate(
     await db.refresh(user)
 
     # 5. Issue tokens — active_role is None until role selection
-    access_token, refresh_token = _make_tokens(user.id, user.active_role)
+    access_token, refresh_token = _make_tokens(
+        user.id,
+        user.active_role,
+        user.registered_roles,
+    )
 
     # 6. Return response
     return VerifyOTPResponse(
@@ -280,7 +292,11 @@ async def select_role(
     refreshed = await _fetch_user_with_profiles(db, current_user.id)
 
     # 5. Reissue tokens with active_role embedded
-    access_token, refresh_token = _make_tokens(refreshed.id, refreshed.active_role)
+    access_token, refresh_token = _make_tokens(
+        refreshed.id,
+        refreshed.active_role,
+        refreshed.registered_roles,
+    )
 
     # 6. Return response
     return SelectRoleResponse(
@@ -327,7 +343,11 @@ async def login_user(
     if full_user is None:
         raise _bad_creds
 
-    access_token, refresh_token = _make_tokens(full_user.id, full_user.active_role)
+    access_token, refresh_token = _make_tokens(
+        full_user.id,
+        full_user.active_role,
+        full_user.registered_roles,
+    )
     return LoginResponse(
         access_token=access_token,
         refresh_token=refresh_token,
@@ -373,7 +393,11 @@ async def refresh_tokens(
         raise _unauthorized
 
     # To-do: record token JTI in deny-list before issuing new pair.
-    access_token, new_refresh_token = _make_tokens(user.id, user.role)
+    access_token, new_refresh_token = _make_tokens(
+        user.id,
+        user.active_role,
+        user.registered_roles,
+    )
     return TokenRefreshResponse(
         access_token=access_token,
         refresh_token=new_refresh_token,
