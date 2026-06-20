@@ -89,11 +89,15 @@ async def update_seller_profile(
     ------
     HTTP 403 — active_role is not 'seller'.
     """
-    if current_user.active_role != "seller":
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Switch to the seller role before editing a seller profile.",
-        )
+    if current_user.active_role is None:
+        detail = "Select a role before completing a profile."
+    elif current_user.active_role != "seller":
+        detail = "Switch to the seller role before editing a seller profile."
+    else:
+        detail = None
+
+    if detail:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=detail)
 
     profile = current_user.seller_profile
     if profile is None:
@@ -126,11 +130,15 @@ async def update_buyer_profile(
     ------
     HTTP 403 — active_role is not 'buyer'.
     """
-    if current_user.active_role != "buyer":
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Switch to the buyer role before editing a buyer profile.",
-        )
+    if current_user.active_role is None:
+        detail = "Select a role before completing a profile."
+    elif current_user.active_role != "buyer":
+        detail = "Switch to the buyer role before editing buyer profile."
+    else:
+        detail = None
+
+    if detail:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=detail)
 
     profile = current_user.buyer_profile
     if profile is None:
