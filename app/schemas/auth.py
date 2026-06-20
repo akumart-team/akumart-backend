@@ -30,14 +30,6 @@ class RegisterRequest(AkumartSchema):
     city: str | None = Field(None, max_length=100)
     address: str | None = None
 
-    @field_validator("role")
-    @classmethod
-    def restrict_role(cls, value: UserRole) -> UserRole:
-        """Prevent self-registration as admin."""
-        if value == UserRole.ADMIN:
-            raise ValueError("Cannot self-register with role 'admin'.")
-        return value
-
     @field_validator("password")
     @classmethod
     def validate_password_strength(cls, value: str) -> str:
@@ -152,7 +144,6 @@ class TokenPayload(AkumartSchema):
     """
 
     sub: str
-    role: str
     active_role: str | None
     registered_roles: list[str]
     type: Literal["access", "refresh"]
