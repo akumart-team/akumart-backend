@@ -31,7 +31,9 @@ from app.schemas.auth import (
     VerifyOTPRequest,
     VerifyOTPResponse,
     SelectRoleRequest,
-    SelectRoleResponse
+    SelectRoleResponse,
+    SwitchRoleResponse,
+    SwitchRoleRequest,
 )
 from app.schemas.user import (
     UserOut,
@@ -227,3 +229,14 @@ async def patch_buyer_profile(
         payload, current_user, db
     )
     return profile
+
+@router.post("/switch-role", response_model=SwitchRoleResponse)
+async def post_switch_role(
+    payload: SwitchRoleRequest,
+    current_user: CurrentUser,
+    db: DBSession,
+):
+    """
+    Allow Users switch roles from buyer to seller and vice versa
+    """
+    return await profile_service.switch_role(payload, current_user, db)

@@ -1,5 +1,4 @@
 """
-app/api/deps/__init__.py
 FastAPI dependency injection layer.
 
 Provides:
@@ -10,6 +9,8 @@ Provides:
   - require_admin         -> role guard: active_role == admin
   - require_active_profile -> marketplace guard
 """
+
+from __future__ import annotations
 
 import uuid
 from collections.abc import AsyncGenerator

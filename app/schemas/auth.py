@@ -4,7 +4,10 @@ import uuid
 from typing import Literal
 from pydantic import EmailStr, Field, field_validator
 
-from app.models.enum import ActiveRole
+from app.models.enum import (
+    ActiveRole,
+    ProfileStatus
+)
 from app.schemas.base import AkumartSchema
 from app.schemas.user import UserOut
 
@@ -188,6 +191,22 @@ class SelectRoleResponse(AkumartSchema):
     message: str = "Role selected successfully."
     active_role: ActiveRole
     user: UserOut
+    access_token: str
+    refresh_token: str
+    token_type: str = "bearer"
+
+
+class SwitchRoleRequest(AkumartSchema):
+    """Body schema for POST /auth/switch-role."""
+    target_role: ActiveRole
+
+
+class SwitchRoleResponse(AkumartSchema):
+    """Returned after a successful switch-role attempt."""
+    message: str
+    profile_exists: bool = True
+    profile_status: ProfileStatus
+    active_role: ActiveRole
     access_token: str
     refresh_token: str
     token_type: str = "bearer"
