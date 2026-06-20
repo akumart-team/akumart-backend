@@ -253,7 +253,10 @@ async def get_seller_profile(
     if current_user.seller_profile is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="No seller profile found. Start profile setup with PATCH /auth/me/seller_profile.",
+            detail=(
+                "No seller profile found."
+                "Start profile setup with PATCH /auth/me/seller_profile."
+            )
         )
     return current_user.seller_profile
 
