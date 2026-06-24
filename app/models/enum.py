@@ -150,6 +150,7 @@ class NigerianStates(str, enum.Enum):
     YOBE = "Yobe"
     ZAMFARA = "Zamfara"
 
+
 class ProfileStatus(str, enum.Enum):
     """
     Profile Statuses for Seller and Buyer Profiles

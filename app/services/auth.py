@@ -284,12 +284,17 @@ async def select_role(
         )
 
     # 3. Apply role
-    current_user.active_role = payload.role.value
+    current_user.active_role = payload.role
     current_user.registered_roles = [payload.role.value]
     await db.commit()
 
     # 4. Reload with profiles
     refreshed = await _fetch_user_with_profiles(db, current_user.id)
+    if refreshed is None:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to reload user after role selection.",
+        )
 
     # 5. Reissue tokens with active_role embedded
     access_token, refresh_token = _make_tokens(
@@ -305,6 +310,7 @@ async def select_role(
         access_token=access_token,
         refresh_token=refresh_token,
     )
+
 
 async def login_user(
     payload: LoginRequest,

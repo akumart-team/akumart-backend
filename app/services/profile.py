@@ -24,6 +24,7 @@ from app.models.user import (
 from app.schemas.user import SellerProfileUpdate, BuyerProfileUpdate
 from app.schemas.auth import SwitchRoleRequest, SwitchRoleResponse
 
+
 # Helpers
 def _make_tokens(
     user_id: uuid.UUID,
@@ -254,7 +255,7 @@ async def switch_role(
         )
 
     # 3c. Profile exists and is not INACTIVE -> switch succeeds
-    current_user.active_role = target_role
+    current_user.active_role = payload.target_role
     if target_role not in current_user.registered_roles:
         current_user.registered_roles = [*current_user.registered_roles, target_role]
 

@@ -172,10 +172,12 @@ class VerifyOTPResponse(AkumartSchema):
     refresh_token: str
     token_type: str = "bearer"
 
+
 class ResendOTPRequest(AkumartSchema):
     """Body schema for ``POST /auth/resend-otp/``."""
 
     user_id: uuid.UUID
+
 
 class SelectRoleRequest(AkumartSchema):
     """

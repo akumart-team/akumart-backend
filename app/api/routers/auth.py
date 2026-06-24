@@ -179,6 +179,7 @@ async def me(
     """
     return UserOut.model_validate(current_user)
 
+
 @router.post(
     "/select-role",
     response_model=SelectRoleResponse,
@@ -198,6 +199,7 @@ async def select_role(
     """
 
     return await auth_service.select_role(payload, current_user, db)
+
 
 @router.patch("/me/seller_profile", response_model=SellerProfileOut)
 async def patch_seller_profile(
@@ -230,6 +232,7 @@ async def patch_buyer_profile(
     )
     return profile
 
+
 @router.post("/switch-role", response_model=SwitchRoleResponse)
 async def post_switch_role(
     payload: SwitchRoleRequest,
@@ -240,6 +243,7 @@ async def post_switch_role(
     Allow Users switch roles from buyer to seller and vice versa
     """
     return await profile_service.switch_role(payload, current_user, db)
+
 
 @router.get("/me/seller_profile", response_model=SellerProfileOut)
 async def get_seller_profile(

@@ -20,7 +20,7 @@ async def send_verification_email(email: str, otp: str) -> None:
         <p>If you did not create an account, ignore this email.</p>
     """
 
-    params = {
+    params: resend.Emails.SendParams = {
         "from": f"{settings.MAIL_FROM_NAME} <{settings.MAIL_FROM}>",
         "to": [email],
         "subject": "Verify your AkuMart account",
@@ -60,7 +60,7 @@ async def send_email_verification_notification(email: str, role_link: str) -> No
             </a>
         </p>
 
-        <p>You can register as a <strong>Buyer</strong> to discover products and services, 
+        <p>You can register as a <strong>Buyer</strong> to discover products and services,
            or as a <strong>Seller</strong> to showcase and grow your business on AkuMart.
         </p>
 
@@ -69,7 +69,7 @@ async def send_email_verification_notification(email: str, role_link: str) -> No
         <p>Thank you for joining AkuMart!</p>
     """
 
-    params = {
+    params: resend.Emails.SendParams = {
         "from": f"{settings.MAIL_FROM_NAME} <{settings.MAIL_FROM}>",
         "to": [email],
         "subject": "Email Verified Successfully: Complete Your AkuMart Profile",
