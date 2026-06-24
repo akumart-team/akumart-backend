@@ -18,19 +18,21 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
         with:
-          python-version: "3.12"
-          cache: "pip"
+          enable-cache: true
+
+      - name: Set up Python
+        run: uv python install 3.12
 
       - name: Install dependencies & mypy
         run: |
-          pip install -r requirements.txt
-          pip install mypy
+          uv sync --frozen
+          uv pip install mypy
 
       - name: Run mypy
-        run: mypy app/ --ignore-missing-imports --explicit-package-bases --pretty
+        run: uv run mypy app/ --ignore-missing-imports --explicit-package-bases --pretty
 
   # JOB 2 – Python Lint
   lint:

@@ -119,6 +119,20 @@ cp .env.example .env   # or create .env manually (see section below)
 
 Fill in the required values in `.env`.
 
+### 4. Dependency Management
+
+This project manages dependencies using `pyproject.toml` and `uv.lock`. 
+
+When adding, removing, or updating dependencies, use `uv` directly:
+
+```bash
+# Add a new dependency
+uv add <dependency_name>
+
+# Install/sync dependencies after changes
+uv sync
+```
+
 ---
 
 ## Environment Variables
