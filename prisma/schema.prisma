@@ -1,0 +1,26 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider  = "postgresql"
+
+}
+
+model Profile {
+  id               String    @id @db.Uuid       // same id as auth.users
+  email            String    @unique
+  firstName        String    @default("") @map("first_name")
+  lastName         String    @default("") @map("last_name")
+  termsAcceptedAt  DateTime? @map("terms_accepted_at")
+  termsVersion     String?   @map("terms_version")
+  companyName      String?   @map("company_name")
+  businessType     String?   @map("business_type")
+  location         String?
+  profileCompleted Boolean   @default(false) @map("profile_completed")
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
+
+  @@map("profiles")
+}
