@@ -4,12 +4,11 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
-
+  provider = "postgresql"
 }
 
 model Profile {
-  id               String    @id @db.Uuid       // same id as auth.users
+  id               String    @id @db.Uuid // same id as auth.users
   email            String    @unique
   firstName        String    @default("") @map("first_name")
   lastName         String    @default("") @map("last_name")
@@ -22,5 +21,81 @@ model Profile {
   createdAt        DateTime  @default(now()) @map("created_at")
   updatedAt        DateTime  @updatedAt @map("updated_at")
 
+  listings      Listing[]
+  savedListings SavedListing[]
+  preferences   UserPreference?
+
   @@map("profiles")
+}
+
+model MaterialCategory {
+  id          String   @id @default(uuid()) @db.Uuid
+  name        String   @unique
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  types MaterialType[]
+
+  @@map("material_categories")
+}
+
+model MaterialType {
+  id         String           @id @default(uuid()) @db.Uuid
+  categoryId String           @map("category_id") @db.Uuid
+  category   MaterialCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  name       String           @unique
+  unit       String           @default("kg") // e.g., kg, pieces, tons
+  createdAt  DateTime         @default(now()) @map("created_at")
+
+  listings Listing[]
+
+  @@map("material_types")
+}
+
+model Listing {
+  id             String       @id @default(uuid()) @db.Uuid
+  userId         String       @map("user_id") @db.Uuid
+  user           Profile      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  materialTypeId String       @map("material_type_id") @db.Uuid
+  materialType   MaterialType @relation(fields: [materialTypeId], references: [id])
+
+  title        String
+  description  String
+  pricePerUnit Float    @map("price_per_unit")
+  quantity     Float
+  unit         String   @default("kg")
+  location     String
+  images       String[] // Cloudinary image URLs
+  status       String   @default("draft") // draft, active, paused, closed
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  savedBy SavedListing[]
+
+  @@map("listings")
+}
+
+model SavedListing {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  user      Profile  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  listingId String   @map("listing_id") @db.Uuid
+  listing   Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@unique([userId, listingId])
+  @@map("saved_listings")
+}
+
+model UserPreference {
+  id                   String   @id @default(uuid()) @db.Uuid
+  userId               String   @unique @map("user_id") @db.Uuid
+  user                 Profile  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  preferredMaterials   String[] @map("preferred_materials") // Array of material category/type IDs or names
+  notificationsEnabled Boolean  @default(true) @map("notifications_enabled")
+  createdAt            DateTime @default(now()) @map("created_at")
+  updatedAt            DateTime @updatedAt @map("updated_at")
+
+  @@map("user_preferences")
 }

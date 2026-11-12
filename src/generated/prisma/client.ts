@@ -44,3 +44,28 @@ export { Prisma }
  * 
  */
 export type Profile = Prisma.ProfileModel
+/**
+ * Model MaterialCategory
+ * 
+ */
+export type MaterialCategory = Prisma.MaterialCategoryModel
+/**
+ * Model MaterialType
+ * 
+ */
+export type MaterialType = Prisma.MaterialTypeModel
+/**
+ * Model Listing
+ * 
+ */
+export type Listing = Prisma.ListingModel
+/**
+ * Model SavedListing
+ * 
+ */
+export type SavedListing = Prisma.SavedListingModel
+/**
+ * Model UserPreference
+ * 
+ */
+export type UserPreference = Prisma.UserPreferenceModel
