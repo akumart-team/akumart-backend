@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, UnauthorizedException,  NotFoundException, } from '@nestjs/common';
+import { BadRequestException, Injectable, UnauthorizedException, NotFoundException, ServiceUnavailableException } from '@nestjs/common';
 import { SupabaseService } from '../../integrations/supabase/supabase.service';
 import { RegisterDto, VerifyCodeDto, LoginDto, ResetPasswordDto, OAuthCallbackDto } from './dto';
 import { PrismaService } from '../../integrations/database/prisma.service';
@@ -52,8 +52,19 @@ export class AuthService {
       email: dto.email, token: dto.code, type: 'recovery',
     });
     if (error || !data.user || !data.session) throw new BadRequestException('Invalid or expired code');
-    await this.supabase.admin.auth.admin.updateUserById(data.user.id, { password: dto.newPassword });
-    await this.supabase.admin.auth.admin.signOut(data.session.access_token, 'global'); // kill all sessions
+    const { error: updateError } = await this.supabase.admin.auth.admin.updateUserById(
+      data.user.id, { password: dto.newPassword },
+    );
+    if (updateError) throw new BadRequestException('Unable to update password');
+
+    const { error: signOutError } = await this.supabase.admin.auth.admin.signOut(
+      data.session.access_token, 'global',
+    );
+    if (signOutError) {
+      throw new ServiceUnavailableException(
+        'Password updated, but existing sessions could not be revoked. Please contact support to secure your existing sessions.',
+      );
+    }
     return { message: 'Password updated. Please log in.' };
   }
 
@@ -64,34 +75,35 @@ export class AuthService {
   }
 
   async logout(accessToken: string) {
-    await this.supabase.admin.auth.admin.signOut(accessToken, 'local');
+    const { error } = await this.supabase.admin.auth.admin.signOut(accessToken, 'local');
+    if (error) throw new ServiceUnavailableException('Unable to log out. Please try again.');
   }
 
   async me(userId: string) {
-  const profile = await this.prisma.profile.findUnique({ where: { id: userId } });
-  if (!profile) throw new NotFoundException('Profile not found');
-  return { ...profile, termsAccepted: !!profile.termsAcceptedAt };
-}
-
-async oauthCallback(dto: OAuthCallbackDto) {
-
-  const { data: u, error } = await this.supabase.admin.auth.getUser(dto.accessToken);
-  if (error || !u.user) throw new UnauthorizedException('Invalid session');
-
-  
-  const { data: s, error: e2 } = await this.supabase.client().auth.refreshSession({
-    refresh_token: dto.refreshToken,
-  });
-  if (e2 || !s.session || s.user?.id !== u.user.id) throw new UnauthorizedException('Invalid session');
-
- 
-  if (dto.acceptedTerms) {
-    await this.prisma.profile.updateMany({
-      where: { id: u.user.id, termsAcceptedAt: null },
-      data: { termsAcceptedAt: new Date(), termsVersion: '1.0' },
-    });
+    const profile = await this.prisma.profile.findUnique({ where: { id: userId } });
+    if (!profile) throw new NotFoundException('Profile not found');
+    return { ...profile, termsAccepted: !!profile.termsAcceptedAt };
   }
 
-  return { session: s.session, profile: await this.me(u.user.id) };
-}
+  async oauthCallback(dto: OAuthCallbackDto) {
+
+    const { data: u, error } = await this.supabase.admin.auth.getUser(dto.accessToken);
+    if (error || !u.user) throw new UnauthorizedException('Invalid session');
+
+    
+    const { data: s, error: e2 } = await this.supabase.client().auth.refreshSession({
+      refresh_token: dto.refreshToken,
+    });
+    if (e2 || !s.session || s.user?.id !== u.user.id) throw new UnauthorizedException('Invalid session');
+
+  
+    if (dto.acceptedTerms) {
+      await this.prisma.profile.updateMany({
+        where: { id: u.user.id, termsAcceptedAt: null },
+        data: { termsAcceptedAt: new Date(), termsVersion: '1.0' },
+      });
+    }
+
+    return { session: s.session, profile: await this.me(u.user.id) };
+  }
 }

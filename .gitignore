@@ -1,2 +1,45 @@
+# Dependencies
+node_modules/
+
+# Build output and TypeScript caches
+dist/
+build/
+*.tsbuildinfo
+
+# Test and coverage output
+coverage/
+.nyc_output/
+test-results/
+playwright-report/
+
+# Local environment and credentials (keep shareable templates)
 .env
-node_modules
+.env.*
+!.env.example
+!.env.sample
+!.env.template
+.aws/
+*.pem
+*.key
+
+# Logs and tool caches
+logs/
+*.log
+.cache/
+.eslintcache
+.npm/
+
+# Local API-client environments may contain tokens
+.postman/
+*.postman_environment.json
+
+# Editor and operating-system files
+.idea/
+.vscode/*
+!.vscode/extensions.json
+.DS_Store
+Thumbs.db
+Desktop.ini
+*.swp
+*.swo
+*~
