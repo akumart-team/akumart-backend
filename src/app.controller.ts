@@ -13,4 +13,11 @@ export class AppController {
   getWelcome(): string {
     return this.appService.getWelcome();
   }
+
+  @Get()
+  @ApiOperation({ summary: 'Welcome to Akumart API' })
+  @ApiOkResponse({ type: String })
+  root(): string {
+    return this.appService.getWelcome();
+  }
 }

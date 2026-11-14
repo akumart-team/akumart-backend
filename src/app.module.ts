@@ -9,7 +9,7 @@ import { AppService } from './app.service';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
-       PrismaModule,
+    PrismaModule,
     HealthModule,
     AuthModule,
   ],

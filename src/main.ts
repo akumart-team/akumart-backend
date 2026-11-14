@@ -9,7 +9,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   app.use(cookieParser());
-  app.setGlobalPrefix('api', { exclude: ['health', 'health/live'] });
+  app.setGlobalPrefix('api', { exclude: ['/', 'health', 'health/live'] });
   app.use(helmet());
   app.enableCors({ origin: process.env.FRONTEND_URL, credentials: true });
   app.useGlobalPipes(
