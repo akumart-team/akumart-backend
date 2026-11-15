@@ -48,6 +48,19 @@ test('migration replay and schema integrity', { timeout: 120_000 }, async (t) =>
     catch (error) { throw new Error(`Migration failed: ${folder}: ${error.message}`, { cause: error }); }
   }
 
+  await t.test('signup persists each chosen role and contact details without granting partner or staff approval', async () => {
+    for (const role of ['buyer', 'seller', 'both', 'logistics']) {
+      const id = randomUUID();
+      await db.query('INSERT INTO auth.users(id,email,raw_user_meta_data) VALUES ($1,$2,$3)', [id, `${role}@signup.example.test`, { first_name: 'Ada', last_name: 'Obi', phone: '+2348012345678', city: 'Lagos', market_role: role }]);
+      const prefs = (await db.query('SELECT * FROM user_preferences WHERE profile_id=$1',[id])).rows[0];
+      assert.equal(prefs.market_role,role);
+      assert.equal(prefs.active_mode,role==='seller'?'seller':['buyer','both'].includes(role)?'buyer':null);
+      const profile = (await db.query('SELECT phone,city FROM profiles WHERE id=$1',[id])).rows[0];
+      assert.deepEqual(profile,{phone:'+2348012345678',city:'Lagos'});
+      assert.equal((await db.query('SELECT count(*)::int AS n FROM staff_memberships WHERE profile_id=$1',[id])).rows[0].n,0);
+      assert.equal((await db.query('SELECT count(*)::int AS n FROM partners WHERE owner_id=$1',[id])).rows[0].n,0);
+    }
+  });
   const insert = async (table, data) => {
     const row = { id: randomUUID(), ...data };
     const keys = Object.keys(row);
@@ -147,6 +160,7 @@ test('migration replay and schema integrity', { timeout: 120_000 }, async (t) =>
   });
   const deposit = await insert('deposits', depositData);
   await t.test('deposit credits preserve fractional points and update the wallet once', async () => {
+    await db.query('UPDATE user_preferences SET akubin=false WHERE profile_id=$1',[buyer.id]);
     await assert.rejects(insert('points_ledger_entries', { profile_id: other.id, kind: 'deposit_credit', amount: '0.25', deposit_id: deposit.id, idempotency_key: 'wrong-owner' }), (e) => ['23503', '23514'].includes(e.code));
     await assert.rejects(insert('points_ledger_entries', { profile_id: buyer.id, kind: 'deposit_credit', amount: '1', deposit_id: deposit.id, idempotency_key: 'wrong-amount' }), (e) => e.code === '23514');
     await insert('points_ledger_entries', { profile_id: buyer.id, kind: 'deposit_credit', amount: '0.25', deposit_id: deposit.id, idempotency_key: 'deposit-credit-1' });

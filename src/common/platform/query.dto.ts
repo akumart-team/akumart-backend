@@ -1,6 +1,8 @@
 import { Type } from 'class-transformer';
 import {
   IsInt,
+  IsIn,
+  IsUUID,
   IsOptional,
   IsString,
   Max,
@@ -26,6 +28,16 @@ export class PageQuery {
   @IsString()
   @MaxLength(100)
   search?: string;
+}
+export class TradeListQuery extends PageQuery {
+  @ApiPropertyOptional({ enum: ['buyer', 'seller'] })
+  @IsOptional()
+  @IsIn(['buyer', 'seller'])
+  mode?: 'buyer' | 'seller';
+  @ApiPropertyOptional({ format: 'uuid' })
+  @IsOptional()
+  @IsUUID()
+  listingId?: string;
 }
 export const paging = (q: PageQuery) => ({
   skip: (q.page - 1) * q.limit,

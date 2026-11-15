@@ -9,7 +9,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { Authenticated, type AuthRequest } from '../../common/platform/api';
+import { Authenticated, OptionalBearerAuth, type AuthRequest } from '../../common/platform/api';
 import { OptionalAuthGuard } from '../../common/platform/optional-auth.guard';
 import { RecommendationsService } from './recommendations.service';
 import { RecommendationEventDto } from './dto/recommendation.dto';
@@ -17,7 +17,7 @@ import { RecommendationEventDto } from './dto/recommendation.dto';
 @Controller({ path: 'recommendations', version: '1' })
 export class RecommendationsController {
   constructor(private readonly service: RecommendationsService) {}
-  @Get('listings') @UseGuards(OptionalAuthGuard) listings(
+  @Get('listings') @OptionalBearerAuth() @UseGuards(OptionalAuthGuard) listings(
     @Req() r: AuthRequest,
   ) {
     return this.service.listingsFor(r.user?.id);
@@ -25,7 +25,7 @@ export class RecommendationsController {
   @Get('listings/:id/similar') similar(@Param('id', ParseUUIDPipe) id: string) {
     return this.service.listingsFor(undefined, id);
   }
-  @Get('articles') @UseGuards(OptionalAuthGuard) articles(
+  @Get('articles') @OptionalBearerAuth() @UseGuards(OptionalAuthGuard) articles(
     @Req() r: AuthRequest,
   ) {
     return this.service.articles(r.user?.id);

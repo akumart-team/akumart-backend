@@ -1,5 +1,9 @@
 # Frontend API implementation
 
+Required signup fields, the four account roles and the independent AkuBin option
+are documented in [Signup requirements](SIGNUP_REQUIREMENTS.md). Buyer/seller order
+and offer lists now accept `mode=buyer|seller` with server-side pagination.
+
 All feature routes use `/api/v1`. Development Swagger: `/docs`; JSON: `/docs/json`.
 The offline [OpenAPI document](openapi.json) contains request bodies, enums and query parameters;
 [ENDPOINTS.md](ENDPOINTS.md) lists the registered operations. Regenerate both after building with
@@ -36,14 +40,15 @@ Prisma models retain their existing family folders; `payments/payout-recipient.p
 
 ## Setup
 
-1. Apply the **new** migration `20261115120000_payout_recipients` to the intended development database:
-   `npx prisma migrate dev`. Do not reset an existing database. Then run `npm run db:generate`.
+1. Apply checked-in migrations to the intended development database with
+   `npx prisma migrate deploy`. Do not reset an existing database. Then run `npm run db:generate`.
    This implementation does not apply remote migrations automatically.
 2. Configure `.env` using `.env.example`. Use Paystack **test** credentials while integrating.
 3. Create the Supabase Storage bucket named by `UPLOADS_BUCKET` as **private**. All file access is
    issued by the backend; verification and partner documents must never be in a public bucket.
-4. Create an initial `StaffMembership` for a trusted existing profile using your database administration
-   process. No browser-selected role or public endpoint grants staff privileges.
+4. Bootstrap the first verified administrator using the server allowlisted profile and
+   `POST /admin/staff/bootstrap`, then manage roles with super-only `GET /admin/staff` and
+   `PUT /admin/staff/:profileId`. See [staff access](STAFF_ACCESS.md) for setup and safeguards.
 5. As `super`, call `POST /admin/settings` once, then `GET` and `PATCH /admin/settings` to configure
    real fees, fare base/per-kg/step, quote deadlines and inspection hours. Defaults do not invent
    usable delivery prices. Include the returned `version` in each update; stale edits return 409.
@@ -198,3 +203,24 @@ No external payment, transfer, refund, storage upload, AI request or remote migr
 by these tests. Complete a Paystack test-mode round trip and a private Supabase bucket smoke test
 with your account before enabling production money movement. The frontend currently still uses
 its local demo store; replacing those calls with this API is a separate integration step.
+# Supplier response revisions
+
+`POST /api/v1/buyer-requests/:id/responses` creates a response, or resubmits
+revised terms when the supplier's current response is declined. Sent and shortlisted
+responses reject duplicate submissions with 409. Resubmission retains the response ID.
+
+`PATCH /api/v1/buyer-requests/:id/responses/:responseId/terms` edits the supplier's
+own sent response. Send `unitPrice`, `quantity`, `note` and required ISO
+`expectedUpdatedAt` from the latest response. Price and quantity are decimal strings.
+Shortlisted/declined edits, closed/expired requests and stale versions return 409.
+Declined responses use the POST route to return to sent.
+
+Buyer decisions use the existing PATCH response route with status shortlisted or
+declined. Include `expectedUpdatedAt` to avoid reviewing terms changed since loading.
+The frontend sends this token on edits, resubmissions and decisions. Revisions and
+decisions record before/after terms in the audit log.
+
+One unexpired active offer per buyer/listing is allowed. Use counteroffers to continue
+an active negotiation; duplicate creation returns 409 with the existing offer ID.
+`GET /users/me/offers?mode=buyer&listingId=:uuid` finds that listing's negotiations.
+

@@ -2,5 +2,9 @@ enum MarketRole {
   buyer
   seller
   both
+  logistics
+  // Legacy value; current signup uses a separate AkuBin boolean for every role.
+  recycler
+  // Legacy/unconfigured accounts only; never an accepted signup choice.
   none
 }

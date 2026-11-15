@@ -14,6 +14,7 @@ import { ApiTags } from '@nestjs/swagger';
 import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
 import {
   Authenticated,
+  OptionalBearerAuth,
   Staff,
   type AuthRequest,
 } from '../../common/platform/api';
@@ -26,6 +27,7 @@ import { EnquiryDto, TicketDto, UpdateTicketDto } from './dto/support.dto';
 export class SupportController {
   constructor(private readonly service: SupportService) {}
   @Post('support/tickets')
+  @OptionalBearerAuth()
   @UseGuards(OptionalAuthGuard, ThrottlerGuard)
   @Throttle({ default: { limit: 5, ttl: 60000 } })
   ticket(@Body() dto: TicketDto, @Req() r: AuthRequest) {

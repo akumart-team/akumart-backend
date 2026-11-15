@@ -19,7 +19,7 @@ export class AkubinTelemetryController {
   @HttpCode(200)
   @UseGuards(ThrottlerGuard)
   @Throttle({ default: { limit: 120, ttl: 60000 } })
-  @ApiHeader({ name: 'X-Akubin-Device-Key', required: false })
+  @ApiHeader({ name: 'x-akubin-device-key', required: false })
   @ApiOperation({
     summary: 'Firmware fill sensor report; timestamp is device uptime',
   })

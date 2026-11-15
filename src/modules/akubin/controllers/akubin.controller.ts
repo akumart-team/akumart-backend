@@ -80,7 +80,7 @@ export class AkubinController {
   @UseGuards(ThrottlerGuard)
   @Throttle({ default: { limit: 20, ttl: 60000 } })
   @ApiHeader({
-    name: 'X-Akubin-Device-Key',
+    name: 'x-akubin-device-key',
     required: false,
     description:
       'Required for authenticated controllers; omitted by explicitly enabled legacy firmware',
@@ -99,7 +99,7 @@ export class AkubinController {
   @HttpCode(200)
   @UseGuards(ThrottlerGuard)
   @Throttle({ default: { limit: 120, ttl: 60000 } })
-  @ApiHeader({ name: 'X-Akubin-Device-Key', required: false })
+  @ApiHeader({ name: 'x-akubin-device-key', required: false })
   @ApiOperation({
     summary: 'Firmware: record deposit and award points exactly once',
   })

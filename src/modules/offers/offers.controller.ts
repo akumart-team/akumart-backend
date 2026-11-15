@@ -11,7 +11,7 @@ import {
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { Authenticated, type AuthRequest } from '../../common/platform/api';
-import { PageQuery } from '../../common/platform/query.dto';
+import { TradeListQuery } from '../../common/platform/query.dto';
 import { OffersService } from './offers.service';
 import { OfferTermsDto } from './dto/offer.dto';
 @ApiTags('Offers')
@@ -26,7 +26,10 @@ export class OffersController {
   ) {
     return this.service.create(r.user.id, id, dto);
   }
-  @Get('users/me/offers') own(@Req() r: AuthRequest, @Query() q: PageQuery) {
+  @Get('users/me/offers') own(
+    @Req() r: AuthRequest,
+    @Query() q: TradeListQuery,
+  ) {
     return this.service.own(r.user.id, q);
   }
   @Get('offers/:id') detail(

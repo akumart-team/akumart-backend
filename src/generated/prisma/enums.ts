@@ -166,6 +166,8 @@ export const MarketRole = {
   buyer: 'buyer',
   seller: 'seller',
   both: 'both',
+  logistics: 'logistics',
+  recycler: 'recycler',
   none: 'none'
 } as const
 

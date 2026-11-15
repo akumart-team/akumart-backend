@@ -49,7 +49,7 @@ async function main() {
           tag: operation.tags?.[0] || 'General',
           route,
           verb,
-          auth: operation.security?.length
+          auth: operation.security?.length && !operation.security.some((requirement) => Object.keys(requirement).length === 0)
             ? 'Bearer'
             : 'Public / optional bearer',
           body: operation.requestBody?.content

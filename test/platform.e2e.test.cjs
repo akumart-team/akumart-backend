@@ -4,11 +4,12 @@ const { test } = require('node:test');
 const { randomUUID, createHmac } = require('node:crypto');
 const { readdir, readFile } = require('node:fs/promises');
 const path = require('node:path');
+const compiled = file => require(path.resolve(__dirname, process.env.AKUMART_TEST_BUILD || '../dist', file));
 const request = require('supertest');
 const { PGlite } = require('@electric-sql/pglite');
 const { PGLiteSocketServer } = require('@electric-sql/pglite-socket');
 const { PrismaPg } = require('@prisma/adapter-pg');
-const { PrismaClient } = require('../dist/generated/prisma/client');
+const { PrismaClient } = compiled('generated/prisma/client');
 const {
   Global,
   Module,
@@ -21,14 +22,14 @@ const { ConfigService } = require('@nestjs/config');
 const { SwaggerModule, DocumentBuilder } = require('@nestjs/swagger');
 const {
   PrismaService,
-} = require('../dist/integrations/database/prisma.service');
+} = compiled('integrations/database/prisma.service');
 const {
   SupabaseService,
-} = require('../dist/integrations/supabase/supabase.service');
+} = compiled('integrations/supabase/supabase.service');
 const {
   PaystackService,
-} = require('../dist/integrations/paystack/paystack.service');
-const { PlatformModule } = require('../dist/common/platform/platform.module');
+} = compiled('integrations/paystack/paystack.service');
+const { PlatformModule } = compiled('common/platform/platform.module');
 const featureNames = [
   'users',
   'notifications',
@@ -48,7 +49,7 @@ const featureNames = [
   'admin',
 ];
 const modules = featureNames.map(
-  (name) => Object.values(require(`../dist/modules/${name}/${name}.module`))[0],
+  (name) => Object.values(compiled(`modules/${name}/${name}.module`))[0],
 );
 
 test(
@@ -102,7 +103,7 @@ test(
     );
     for (const [name, id] of Object.entries(identities)) {
       await prisma.$executeRaw`INSERT INTO auth.users(id,email,raw_user_meta_data) VALUES (${id}::uuid, ${`${name}@example.test`}, ${JSON.stringify({ first_name: name, terms_accepted_at: new Date().toISOString(), terms_version: '1.0' })}::jsonb)`;
-      await prisma.profile.update({ where: { id }, data: { city: 'Lagos' } });
+      await prisma.profile.update({ where: { id }, data: { city: 'Lagos', lastName: 'Test', displayName:name+' Test', phone: '+2348012345678' } });
     }
     for (const role of ['operations', 'finance', 'content', 'super'])
       await prisma.staffMembership.create({
@@ -298,6 +299,29 @@ test(
         const me = await invoke('get', '/users/me', 'buyer');
         assert.equal(me.data.preferences.akubin, true);
         assert.equal(me.data.profileCompleted, true);
+        await invoke('post', '/users/me/onboarding/complete', 'outsider', { marketRole: 'none', akubin: true, interests: [] }, 400);
+        await prisma.profile.update({where:{id:identities.outsider},data:{phone:null}});
+        await invoke('post', '/users/me/onboarding/complete', 'outsider', { marketRole: 'logistics', akubin: true, interests: [] }, 400);
+        assert.equal((await prisma.userPreferences.findUnique({where:{profileId:identities.outsider}})).marketRole,'none');
+        await prisma.profile.update({where:{id:identities.outsider},data:{phone:'+2348012345678'}});
+        await prisma.profile.update({where:{id:identities.outsider},data:{displayName:null}});
+        await invoke('post', '/users/me/onboarding/complete', 'outsider', { marketRole: 'logistics', akubin: true, interests: [] }, 400);
+        await prisma.profile.update({where:{id:identities.outsider},data:{displayName:'Outsider Test'}});
+        await invoke('post', '/users/me/onboarding/complete', 'outsider', { marketRole: 'logistics', akubin: true, interests: [] });
+        assert.equal((await invoke('get','/users/me','outsider')).data.preferences.activeMode,null);
+        await prisma.profile.update({where:{id:identities.outsider},data:{termsAcceptedAt:null,termsVersion:null,profileCompleted:false,onboardedAt:null}});
+        await invoke('post', '/users/me/onboarding/complete', 'outsider', { marketRole: 'buyer', akubin: true, interests: [] }, 400);
+        await invoke('post', '/users/me/onboarding/complete', 'outsider', { marketRole: 'buyer', akubin: true, interests: [], acceptedTerms:false }, 400);
+        await invoke('post', '/users/me/onboarding/complete', 'outsider', { marketRole: 'buyer', akubin: true, interests: [], acceptedTerms:true });
+        const consenting = (await invoke('get','/users/me','outsider')).data;
+        assert.ok(consenting.termsAcceptedAt);assert.equal(consenting.preferences.marketRole,'buyer');
+        for (const marketRole of ['buyer','seller','both','logistics']) {
+          for (const akubin of [false,true]) {
+            await invoke('patch','/users/me/preferences','outsider',{marketRole,akubin});
+            const profile=(await invoke('get','/users/me','outsider')).data;
+            assert.equal(profile.preferences.marketRole,marketRole);assert.equal(profile.preferences.akubin,akubin);assert.equal(profile.staff,null);assert.equal(profile.partner,null);
+          }
+        }
         const id = await upload('buyer', 'verification_document');
         await invoke(
           'get',
@@ -381,6 +405,8 @@ test(
           'buyer',
           { unitPrice: '50', quantity: '20', conditions: [] },
         );
+        await invoke('post', `/listings/${listingId}/offers`, 'buyer',
+          { unitPrice: '49', quantity: '20', conditions: [] }, 409);
         await invoke(
           'get',
           `/offers/${offer.data.id}`,
@@ -418,6 +444,15 @@ test(
           '20',
         );
         await invoke('get', `/orders/${orderId}`, 'outsider', undefined, 404);
+        const fresh = await invoke('post', `/listings/${listingId}/offers`, 'buyer',
+          { unitPrice: '49', quantity: '10', conditions: [] });
+        await invoke('post', `/offers/${fresh.data.id}/reject`, 'seller', {}, 200);
+        const afterRejected = await invoke('post', `/listings/${listingId}/offers`, 'buyer',
+          { unitPrice: '48', quantity: '10', conditions: [] });
+        await prisma.offer.update({where:{id:afterRejected.data.id},data:{createdAt:new Date(Date.now()-7200000),expiresAt:new Date(Date.now()-1000)}});
+        const afterExpired = await invoke('post', `/listings/${listingId}/offers`, 'buyer',
+          { unitPrice: '48', quantity: '10', conditions: [] });
+        await invoke('post', `/offers/${afterExpired.data.id}/reject`, 'seller', {}, 200);
       },
     );
     await t.test(
@@ -697,6 +732,7 @@ test(
     await t.test(
       'unpaid cancellation restores stock and competing accepted offers cannot oversell',
       async () => {
+        await verify('driver', 'basic');
         const a = await invoke(
           'post',
           `/listings/${listingId}/offers`,
@@ -706,7 +742,7 @@ test(
         const b = await invoke(
           'post',
           `/listings/${listingId}/offers`,
-          'buyer',
+          'driver',
           { unitPrice: '50', quantity: '60', conditions: [] },
         );
         const accepted = await invoke(
@@ -875,6 +911,15 @@ test(
           'seller',
           { unitPrice: '50', quantity: '20', note: 'Clean sorted bottles' },
         );
+        const responsePath = `/buyer-requests/${needed.data.id}/responses/${response.data.id}`;
+        const terms = { unitPrice: '45', quantity: '25', note: 'Revised sorted bottles', expectedUpdatedAt: response.data.updatedAt };
+        await invoke('patch', responsePath + '/terms', 'outsider', terms, 403);
+        await invoke('patch', responsePath + '/terms', 'buyer', terms, 404);
+        const edited = await invoke('patch', responsePath + '/terms', 'seller', terms);
+        assert.equal(edited.data.id, response.data.id);
+        await invoke('patch', responsePath + '/terms', 'seller', terms, 409);
+        await invoke('patch', responsePath, 'buyer', {status:'shortlisted', expectedUpdatedAt:response.data.updatedAt}, 409);
+        await invoke('post', `/buyer-requests/${needed.data.id}/responses`, 'seller', terms, 409);
         assert.equal(
           (await invoke('get', `/buyer-requests/${needed.data.id}`, 'outsider'))
             .data.responses.length,
@@ -893,6 +938,17 @@ test(
           'buyer',
           { status: 'shortlisted' },
         );
+        await invoke('patch', responsePath + '/terms', 'seller', {...terms, expectedUpdatedAt:edited.data.updatedAt}, 409);
+        const declined = await invoke('patch', responsePath, 'buyer', {status:'declined'});
+        const resent = await invoke('post', `/buyer-requests/${needed.data.id}/responses`, 'seller',
+          {...terms, unitPrice:'40', expectedUpdatedAt:declined.data.updatedAt});
+        assert.equal(resent.data.id, response.data.id);
+        assert.equal(resent.data.status, 'sent');
+        assert.equal(resent.data.unitPrice, '40');
+        const audit = await prisma.auditLog.findMany({where:{resourceId:response.data.id,action:'buyer_request.response_resubmitted'}});
+        assert.equal(audit.length, 1);
+        assert.equal(audit[0].detail.before.unitPrice, '45');
+        assert.equal(audit[0].detail.after.unitPrice, '40');
       },
     );
     await t.test(
@@ -1145,6 +1201,46 @@ test(
         );
         assert.ok(doc.paths['/api/v1/orders/{id}/checkout']);
         assert.ok(doc.paths['/api/v1/webhooks/paystack']);
+        for (const [route, verb] of [
+          ['/api/v1/uploads/{id}/access', 'get'],
+          ['/api/v1/listings/{id}', 'get'],
+          ['/api/v1/support/tickets', 'post'],
+          ['/api/v1/recommendations/listings', 'get'],
+          ['/api/v1/recommendations/articles', 'get'],
+          ['/api/v1/assistant/messages', 'post'],
+          ['/api/v1/assistant/conversations/{id}', 'get'],
+        ]) {
+          assert.deepEqual(doc.paths[route][verb].security, [{ bearer: [] }, {}], `${route}: optional bearer must be documented for Swagger`);
+        }
+      },
+    );
+    await t.test(
+      'buyer and seller lists filter ownership before server pagination',
+      async () => {
+        for (const endpoint of ['/orders','/users/me/offers']) {
+          for (const mode of ['buyer','seller']) {
+            const actor = mode;
+            const result = await invoke('get', `${endpoint}?mode=${mode}&limit=1`, actor);
+            assert.equal(result.data.length,1);
+            assert.ok(result.pagination.total >= 1);
+            assert.equal(result.data[0][`${mode}Id`],identities[actor]);
+            const title = endpoint === '/orders' ? result.data[0].title : result.data[0].listing.title;
+            const matches = await invoke('get',`${endpoint}?mode=${mode}&search=${encodeURIComponent(title.toLowerCase().slice(0,80))}&limit=1`,actor);
+            assert.equal(matches.data.length,1);assert.equal(matches.data[0][`${mode}Id`],identities[actor]);
+            const missing = await invoke('get',`${endpoint}?mode=${mode}&search=zzznomatchingrecord000000000000`,actor);
+            assert.equal(missing.data.length,0);assert.equal(missing.pagination.total,0);
+            const opposite = await invoke('get', `${endpoint}?mode=${mode==='buyer'?'seller':'buyer'}`, actor);
+            assert.equal(opposite.data.length,0);
+            assert.equal(opposite.pagination.total,0);
+          }
+          await invoke('get', `${endpoint}?mode=super`, 'buyer', undefined,400);
+        }
+        const requests = await invoke('get','/users/me/buyer-requests','buyer');assert.ok(requests.data.length);
+        const term = encodeURIComponent(requests.data[0].title.toLowerCase().slice(0,80));
+        for(const endpoint of ['/buyer-requests','/users/me/buyer-requests']) {
+          const matches=await invoke('get',endpoint+'?search='+term+'&limit=1','buyer');assert.equal(matches.data.length,1);
+          const missing=await invoke('get',endpoint+'?search=zzznomatchingrecord000000000000','buyer');assert.equal(missing.pagination.total,0);
+        }
       },
     );
     await t.test(
