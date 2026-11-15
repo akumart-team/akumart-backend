@@ -1,0 +1,13 @@
+model OrderReview {
+  orderId   String   @id @map("order_id") @db.Uuid
+  buyerId   String   @map("buyer_id") @db.Uuid
+  stars     Int
+  text      String?
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  order     Order    @relation(fields: [orderId, buyerId], references: [id, buyerId], onDelete: Restrict, onUpdate: Restrict)
+  buyer     Profile  @relation(fields: [buyerId], references: [id], onDelete: Restrict)
+
+  @@unique([orderId, buyerId])
+  @@index([buyerId])
+  @@map("order_reviews")
+}

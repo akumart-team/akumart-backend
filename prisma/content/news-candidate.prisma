@@ -1,0 +1,14 @@
+model NewsCandidate {
+  id           String     @id @default(uuid()) @db.Uuid
+  title        String
+  source       String
+  summary      String
+  url          String     @unique
+  status       NewsStatus @default(proposed)
+  reviewedById String?    @map("reviewed_by_id") @db.Uuid
+  reviewedAt   DateTime?  @map("reviewed_at") @db.Timestamptz(3)
+  createdAt    DateTime   @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@index([status, createdAt])
+  @@map("news_candidates")
+}

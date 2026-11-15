@@ -1,0 +1,14 @@
+model DeliveryAssignment {
+  orderId    String        @id @map("order_id") @db.Uuid
+  quoteId    String        @unique @map("quote_id") @db.Uuid
+  partnerId  String        @map("partner_id") @db.Uuid
+  agreedFare Decimal       @map("agreed_fare") @db.Decimal(20, 2)
+  assignedAt DateTime      @default(now()) @map("assigned_at") @db.Timestamptz(3)
+  order      Order         @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  quote      DeliveryQuote @relation(fields: [quoteId, orderId, partnerId], references: [id, orderId, partnerId], onDelete: Restrict)
+  partner    Partner       @relation(fields: [partnerId], references: [id], onDelete: Restrict)
+
+  @@unique([quoteId, orderId, partnerId])
+  @@index([partnerId])
+  @@map("delivery_assignments")
+}

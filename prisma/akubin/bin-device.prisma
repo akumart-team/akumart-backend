@@ -1,0 +1,19 @@
+model BinDevice {
+  id             String         @id @default(uuid()) @db.Uuid
+  binId          String         @map("bin_id") @db.Uuid
+  serialNumber   String         @unique @map("serial_number")
+  credentialHash String?        @map("credential_hash")
+  // Legacy firmware supplies only binId. Enable this mode explicitly for a controlled pilot.
+  authMode       DeviceAuthMode @default(authenticated) @map("auth_mode")
+  revokedAt      DateTime?      @map("revoked_at") @db.Timestamptz(3)
+  lastSeenAt     DateTime?      @map("last_seen_at") @db.Timestamptz(3)
+  createdAt      DateTime       @default(now()) @map("created_at") @db.Timestamptz(3)
+  bin            Bin            @relation(fields: [binId], references: [id], onDelete: Restrict)
+  deposits       Deposit[]
+  sessions       BinSession[]
+  telemetry      BinTelemetry[]
+
+  @@unique([id, binId])
+  @@index([binId])
+  @@map("bin_devices")
+}

@@ -1,0 +1,12 @@
+model AdvertisingPackage {
+  id           String     @id @db.VarChar(40)
+  name         String
+  durationDays Int        @map("duration_days")
+  price        Decimal    @db.Decimal(20, 2)
+  currency     String     @default("NGN") @db.Char(3)
+  active       Boolean    @default(true)
+  updatedAt    DateTime   @updatedAt @map("updated_at") @db.Timestamptz(3)
+  campaigns    Campaign[]
+
+  @@map("advertising_packages")
+}

@@ -1,0 +1,23 @@
+model BinSession {
+  id             String           @id @default(uuid()) @db.Uuid
+  profileId      String           @map("profile_id") @db.Uuid
+  binId          String           @map("bin_id") @db.Uuid
+  deviceId       String           @map("device_id") @db.Uuid
+  // Created only after permanent-PIN identification. Never store that PIN in a session.
+  status         BinSessionStatus @default(active)
+  expiresAt      DateTime         @map("expires_at") @db.Timestamptz(3)
+  startedAt      DateTime         @default(now()) @map("started_at") @db.Timestamptz(3)
+  lastActivityAt DateTime         @default(now()) @map("last_activity_at") @db.Timestamptz(3)
+  endedAt        DateTime?        @map("ended_at") @db.Timestamptz(3)
+  createdAt      DateTime         @default(now()) @map("created_at") @db.Timestamptz(3)
+  profile        Profile          @relation(fields: [profileId], references: [id], onDelete: Restrict)
+  bin            Bin              @relation(fields: [binId], references: [id], onDelete: Restrict)
+  device         BinDevice        @relation(fields: [deviceId, binId], references: [id, binId], onDelete: Restrict, onUpdate: Restrict)
+  deposits       Deposit[]
+
+  @@unique([id, binId, profileId, deviceId])
+  @@index([profileId, createdAt])
+  @@index([binId, status])
+  @@index([status, expiresAt])
+  @@map("bin_sessions")
+}

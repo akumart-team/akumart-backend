@@ -1,0 +1,7 @@
+enum StaffRole {
+  super
+  operations
+  support
+  finance
+  content
+}

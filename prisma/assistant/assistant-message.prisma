@@ -1,0 +1,13 @@
+model AssistantMessage {
+  id               String                @id @default(uuid()) @db.Uuid
+  conversationId   String                @map("conversation_id") @db.Uuid
+  role             AssistantRole
+  content          String
+  // Structured result references, not unrestricted copies of user/application data.
+  resultReferences Json?
+  createdAt        DateTime              @default(now()) @map("created_at") @db.Timestamptz(3)
+  conversation     AssistantConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId, createdAt])
+  @@map("assistant_messages")
+}

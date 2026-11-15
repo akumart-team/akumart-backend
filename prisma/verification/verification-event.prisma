@@ -1,0 +1,13 @@
+model VerificationEvent {
+  id           String                 @id @default(uuid()) @db.Uuid
+  submissionId String                 @map("submission_id") @db.Uuid
+  actorId      String?                @map("actor_id") @db.Uuid
+  action       String
+  status       VerificationStatus
+  reason       String?
+  createdAt    DateTime               @default(now()) @map("created_at") @db.Timestamptz(3)
+  submission   VerificationSubmission @relation(fields: [submissionId], references: [id], onDelete: Restrict)
+
+  @@index([submissionId, createdAt])
+  @@map("verification_events")
+}

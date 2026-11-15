@@ -1,0 +1,13 @@
+model CampaignEvent {
+  id         String            @id @default(uuid()) @db.Uuid
+  campaignId String            @map("campaign_id") @db.Uuid
+  kind       CampaignEventKind
+  // Server-issued deduplication key; avoid collecting raw network identifiers.
+  eventKey   String            @unique @map("event_key")
+  placement  String
+  createdAt  DateTime          @default(now()) @map("created_at") @db.Timestamptz(3)
+  campaign   Campaign          @relation(fields: [campaignId], references: [id], onDelete: Restrict)
+
+  @@index([campaignId, kind, createdAt])
+  @@map("campaign_events")
+}

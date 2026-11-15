@@ -1,0 +1,8 @@
+enum RedemptionStatus {
+  pending_review
+  approved
+  processing
+  completed
+  rejected
+  failed
+}

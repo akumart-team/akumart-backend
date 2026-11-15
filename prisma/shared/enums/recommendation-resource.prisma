@@ -1,0 +1,5 @@
+enum RecommendationResource {
+  listing
+  article
+  job
+}

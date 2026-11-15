@@ -1,0 +1,4 @@
+enum CampaignEventKind {
+  impression
+  click
+}

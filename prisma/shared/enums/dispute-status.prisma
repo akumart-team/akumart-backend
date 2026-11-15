@@ -1,0 +1,5 @@
+enum DisputeStatus {
+  open
+  under_review
+  resolved
+}

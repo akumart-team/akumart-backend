@@ -1,0 +1,8 @@
+enum CampaignStatus {
+  draft
+  pending_review
+  approved
+  rejected
+  paused
+  expired
+}

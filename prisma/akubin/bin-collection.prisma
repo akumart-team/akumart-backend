@@ -1,0 +1,13 @@
+model BinCollection {
+  id               String   @id @default(uuid()) @db.Uuid
+  binId            String   @map("bin_id") @db.Uuid
+  collector        String
+  recordedById     String   @map("recorded_by_id") @db.Uuid
+  collectedAt      DateTime @map("collected_at") @db.Timestamptz(3)
+  capacityAfterPct Decimal  @map("capacity_after_pct") @db.Decimal(5, 2)
+  note             String?
+  bin              Bin      @relation(fields: [binId], references: [id], onDelete: Restrict)
+
+  @@index([binId, collectedAt])
+  @@map("bin_collections")
+}

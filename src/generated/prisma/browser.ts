@@ -18,7 +18,312 @@ export { Prisma }
 export * as $Enums from './enums.js'
 export * from './enums.js';
 /**
+ * Model ConsentRecord
+ * 
+ */
+export type ConsentRecord = Prisma.ConsentRecordModel
+/**
  * Model Profile
  * 
  */
 export type Profile = Prisma.ProfileModel
+/**
+ * Model StaffMembership
+ * 
+ */
+export type StaffMembership = Prisma.StaffMembershipModel
+/**
+ * Model UserPreferences
+ * 
+ */
+export type UserPreferences = Prisma.UserPreferencesModel
+/**
+ * Model UserSecurity
+ * 
+ */
+export type UserSecurity = Prisma.UserSecurityModel
+/**
+ * Model AdvertisingPackage
+ * 
+ */
+export type AdvertisingPackage = Prisma.AdvertisingPackageModel
+/**
+ * Model CampaignEvent
+ * 
+ */
+export type CampaignEvent = Prisma.CampaignEventModel
+/**
+ * Model Campaign
+ * 
+ */
+export type Campaign = Prisma.CampaignModel
+/**
+ * Model BinCollection
+ * 
+ */
+export type BinCollection = Prisma.BinCollectionModel
+/**
+ * Model BinDevice
+ * 
+ */
+export type BinDevice = Prisma.BinDeviceModel
+/**
+ * Model BinEvent
+ * 
+ */
+export type BinEvent = Prisma.BinEventModel
+/**
+ * Model BinMaintenanceTicket
+ * 
+ */
+export type BinMaintenanceTicket = Prisma.BinMaintenanceTicketModel
+/**
+ * Model BinSession
+ * 
+ */
+export type BinSession = Prisma.BinSessionModel
+/**
+ * Model BinTelemetry
+ * 
+ */
+export type BinTelemetry = Prisma.BinTelemetryModel
+/**
+ * Model Bin
+ * 
+ */
+export type Bin = Prisma.BinModel
+/**
+ * Model Deposit
+ * 
+ */
+export type Deposit = Prisma.DepositModel
+/**
+ * Model PointsLedgerEntry
+ * 
+ */
+export type PointsLedgerEntry = Prisma.PointsLedgerEntryModel
+/**
+ * Model PointsWallet
+ * 
+ */
+export type PointsWallet = Prisma.PointsWalletModel
+/**
+ * Model AssistantConversation
+ * 
+ */
+export type AssistantConversation = Prisma.AssistantConversationModel
+/**
+ * Model AssistantMessage
+ * 
+ */
+export type AssistantMessage = Prisma.AssistantMessageModel
+/**
+ * Model AuditLog
+ * 
+ */
+export type AuditLog = Prisma.AuditLogModel
+/**
+ * Model Article
+ * 
+ */
+export type Article = Prisma.ArticleModel
+/**
+ * Model NewsCandidate
+ * 
+ */
+export type NewsCandidate = Prisma.NewsCandidateModel
+/**
+ * Model SavedArticle
+ * 
+ */
+export type SavedArticle = Prisma.SavedArticleModel
+/**
+ * Model DeliveryAssignment
+ * 
+ */
+export type DeliveryAssignment = Prisma.DeliveryAssignmentModel
+/**
+ * Model DeliveryProof
+ * 
+ */
+export type DeliveryProof = Prisma.DeliveryProofModel
+/**
+ * Model DeliveryQuote
+ * 
+ */
+export type DeliveryQuote = Prisma.DeliveryQuoteModel
+/**
+ * Model JobNotice
+ * 
+ */
+export type JobNotice = Prisma.JobNoticeModel
+/**
+ * Model PartnerDocument
+ * 
+ */
+export type PartnerDocument = Prisma.PartnerDocumentModel
+/**
+ * Model Partner
+ * 
+ */
+export type Partner = Prisma.PartnerModel
+/**
+ * Model BuyerRequestResponse
+ * 
+ */
+export type BuyerRequestResponse = Prisma.BuyerRequestResponseModel
+/**
+ * Model BuyerRequest
+ * 
+ */
+export type BuyerRequest = Prisma.BuyerRequestModel
+/**
+ * Model ListingImage
+ * 
+ */
+export type ListingImage = Prisma.ListingImageModel
+/**
+ * Model ListingReport
+ * 
+ */
+export type ListingReport = Prisma.ListingReportModel
+/**
+ * Model Listing
+ * 
+ */
+export type Listing = Prisma.ListingModel
+/**
+ * Model OfferStep
+ * 
+ */
+export type OfferStep = Prisma.OfferStepModel
+/**
+ * Model Offer
+ * 
+ */
+export type Offer = Prisma.OfferModel
+/**
+ * Model SavedListing
+ * 
+ */
+export type SavedListing = Prisma.SavedListingModel
+/**
+ * Model Notification
+ * 
+ */
+export type Notification = Prisma.NotificationModel
+/**
+ * Model DisputeEvidence
+ * 
+ */
+export type DisputeEvidence = Prisma.DisputeEvidenceModel
+/**
+ * Model Dispute
+ * 
+ */
+export type Dispute = Prisma.DisputeModel
+/**
+ * Model OrderEvent
+ * 
+ */
+export type OrderEvent = Prisma.OrderEventModel
+/**
+ * Model OrderReview
+ * 
+ */
+export type OrderReview = Prisma.OrderReviewModel
+/**
+ * Model Order
+ * 
+ */
+export type Order = Prisma.OrderModel
+/**
+ * Model Payment
+ * 
+ */
+export type Payment = Prisma.PaymentModel
+/**
+ * Model PayoutRecipient
+ * 
+ */
+export type PayoutRecipient = Prisma.PayoutRecipientModel
+/**
+ * Model Refund
+ * 
+ */
+export type Refund = Prisma.RefundModel
+/**
+ * Model SettlementHold
+ * 
+ */
+export type SettlementHold = Prisma.SettlementHoldModel
+/**
+ * Model SettlementTransfer
+ * 
+ */
+export type SettlementTransfer = Prisma.SettlementTransferModel
+/**
+ * Model Settlement
+ * 
+ */
+export type Settlement = Prisma.SettlementModel
+/**
+ * Model WebhookEvent
+ * 
+ */
+export type WebhookEvent = Prisma.WebhookEventModel
+/**
+ * Model RecommendationEvent
+ * 
+ */
+export type RecommendationEvent = Prisma.RecommendationEventModel
+/**
+ * Model Redemption
+ * 
+ */
+export type Redemption = Prisma.RedemptionModel
+/**
+ * Model Reward
+ * 
+ */
+export type Reward = Prisma.RewardModel
+/**
+ * Model MaterialPointRate
+ * 
+ */
+export type MaterialPointRate = Prisma.MaterialPointRateModel
+/**
+ * Model PlatformSettings
+ * 
+ */
+export type PlatformSettings = Prisma.PlatformSettingsModel
+/**
+ * Model Enquiry
+ * 
+ */
+export type Enquiry = Prisma.EnquiryModel
+/**
+ * Model SupportTicket
+ * 
+ */
+export type SupportTicket = Prisma.SupportTicketModel
+/**
+ * Model Upload
+ * 
+ */
+export type Upload = Prisma.UploadModel
+/**
+ * Model VerificationDocument
+ * 
+ */
+export type VerificationDocument = Prisma.VerificationDocumentModel
+/**
+ * Model VerificationEvent
+ * 
+ */
+export type VerificationEvent = Prisma.VerificationEventModel
+/**
+ * Model VerificationSubmission
+ * 
+ */
+export type VerificationSubmission = Prisma.VerificationSubmissionModel

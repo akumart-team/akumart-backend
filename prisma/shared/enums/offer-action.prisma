@@ -1,0 +1,7 @@
+enum OfferAction {
+  offer
+  counter
+  accept
+  reject
+  expire
+}

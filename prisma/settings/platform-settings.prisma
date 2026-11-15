@@ -1,0 +1,22 @@
+// One row, id = 1. Orders/deposits snapshot the rates that applied at creation.
+model PlatformSettings {
+  id                 Int      @id @default(1)
+  sellerFeePct       Decimal  @default(5) @map("seller_fee_pct") @db.Decimal(5, 2)
+  partnerFeePct      Decimal  @default(3) @map("partner_fee_pct") @db.Decimal(5, 2)
+  pointsPerItem      Int      @default(1) @map("points_per_item")
+  itemKgEquivalent   Decimal  @default(0.02) @map("item_kg_equivalent") @db.Decimal(18, 6)
+  airtimeMinPoints   Int      @default(100) @map("airtime_min_points")
+  cashMinPoints      Int      @default(1000) @map("cash_min_points")
+  pointValueNaira    Decimal  @default(1) @map("point_value_naira") @db.Decimal(18, 6)
+  inspectionHours    Int      @default(24) @map("inspection_hours")
+  fareBase           Decimal  @default(0) @map("fare_base") @db.Decimal(20, 2)
+  farePerKg          Decimal  @default(0) @map("fare_per_kg") @db.Decimal(18, 6)
+  fareStep           Decimal  @default(100) @map("fare_step") @db.Decimal(20, 2)
+  fareMinPct         Decimal  @default(20) @map("fare_min_pct") @db.Decimal(5, 2)
+  fareMaxPct         Decimal  @default(20) @map("fare_max_pct") @db.Decimal(5, 2)
+  quoteDeadlineHours Int      @default(24) @map("quote_deadline_hours")
+  version            Int      @default(0)
+  updatedAt          DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  @@map("platform_settings")
+}

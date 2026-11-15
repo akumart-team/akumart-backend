@@ -1,0 +1,16 @@
+enum OrderStatus {
+  choose_fulfilment
+  awaiting_quotes
+  no_quotes
+  awaiting_payment
+  paid
+  picked_up
+  in_transit
+  delivered
+  proof_uploaded
+  confirmed
+  settled
+  disputed
+  refunded
+  cancelled
+}

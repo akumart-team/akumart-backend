@@ -1,0 +1,14 @@
+model AssistantConversation {
+  id               String             @id @default(uuid()) @db.Uuid
+  profileId        String?            @map("profile_id") @db.Uuid
+  // Hashed guest session identifier; authenticated conversations use profileId.
+  guestSessionHash String?            @map("guest_session_hash")
+  createdAt        DateTime           @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt        DateTime           @updatedAt @map("updated_at") @db.Timestamptz(3)
+  profile          Profile?           @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  messages         AssistantMessage[]
+
+  @@index([profileId, updatedAt])
+  @@index([guestSessionHash])
+  @@map("assistant_conversations")
+}

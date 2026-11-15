@@ -1,0 +1,6 @@
+enum EnquiryKind {
+  general
+  support
+  business
+  logistics
+}

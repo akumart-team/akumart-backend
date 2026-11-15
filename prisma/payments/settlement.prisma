@@ -1,0 +1,18 @@
+model Settlement {
+  id            String               @id @default(uuid()) @db.Uuid
+  orderId       String               @unique @map("order_id") @db.Uuid
+  currency      String               @default("NGN") @db.Char(3)
+  sellerGross   Decimal              @map("seller_gross") @db.Decimal(20, 2)
+  partnerGross  Decimal              @map("partner_gross") @db.Decimal(20, 2)
+  sellerFee     Decimal              @map("seller_fee") @db.Decimal(20, 2)
+  partnerFee    Decimal              @map("partner_fee") @db.Decimal(20, 2)
+  sellerPayout  Decimal              @map("seller_payout") @db.Decimal(20, 2)
+  partnerPayout Decimal              @map("partner_payout") @db.Decimal(20, 2)
+  status        TransferStatus       @default(pending)
+  createdAt     DateTime             @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt     DateTime             @updatedAt @map("updated_at") @db.Timestamptz(3)
+  order         Order                @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  transfers     SettlementTransfer[]
+
+  @@map("settlements")
+}

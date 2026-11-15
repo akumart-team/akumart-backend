@@ -1,0 +1,15 @@
+// Permanent PIN identifies a depositor at a physical AkuBin; it is not a login password.
+// Never return this model in profile responses or store the plaintext PIN.
+model UserSecurity {
+  profileId         String    @id @map("profile_id") @db.Uuid
+  pinHash           String?   @map("pin_hash")
+  // Lowercase hex HMAC-SHA256 of the PIN using a server-only secret, for unique account lookup.
+  // Provision together with pinHash; null means PIN-only identification is not configured.
+  pinLookupHash     String?   @unique @map("pin_lookup_hash") @db.VarChar(64)
+  failedPinAttempts Int       @default(0) @map("failed_pin_attempts")
+  pinLockedUntil    DateTime? @map("pin_locked_until") @db.Timestamptz(3)
+  updatedAt         DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+  profile           Profile   @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@map("user_security")
+}

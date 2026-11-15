@@ -1,9 +1,9 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, VERSION_NEUTRAL } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AppService } from './app.service';
 
 @ApiTags('App')
-@Controller()
+@Controller({ version: VERSION_NEUTRAL })
 export class AppController {
   constructor(private readonly appService: AppService) {}
 
@@ -14,10 +14,4 @@ export class AppController {
     return this.appService.getWelcome();
   }
 
-  @Get()
-  @ApiOperation({ summary: 'Welcome to Akumart API' })
-  @ApiOkResponse({ type: String })
-  root(): string {
-    return this.appService.getWelcome();
-  }
 }

@@ -1,0 +1,24 @@
+model Upload {
+  id                    String                 @id @default(uuid()) @db.Uuid
+  uploadedById          String                 @map("uploaded_by_id") @db.Uuid
+  purpose               UploadPurpose
+  provider              String                 @db.VarChar(40)
+  storageKey            String                 @map("storage_key")
+  originalName          String                 @map("original_name")
+  mimeType              String                 @map("mime_type") @db.VarChar(100)
+  sizeBytes             BigInt                 @map("size_bytes")
+  status                UploadStatus           @default(pending)
+  createdAt             DateTime               @default(now()) @map("created_at") @db.Timestamptz(3)
+  uploadedBy            Profile                @relation(fields: [uploadedById], references: [id], onDelete: Restrict)
+  verificationDocuments VerificationDocument[]
+  listingImages         ListingImage[]
+  partnerDocuments      PartnerDocument[]
+  deliveryProofs        DeliveryProof[]
+  disputeEvidence       DisputeEvidence[]
+  campaignCreatives     Campaign[]
+  articleImages         Article[]
+
+  @@unique([provider, storageKey])
+  @@index([uploadedById, createdAt])
+  @@map("uploads")
+}

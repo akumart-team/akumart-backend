@@ -1,0 +1,20 @@
+model Refund {
+  id                String         @id @default(uuid()) @db.Uuid
+  paymentId         String         @map("payment_id") @db.Uuid
+  disputeId         String?        @map("dispute_id") @db.Uuid
+  idempotencyKey    String         @unique @map("idempotency_key")
+  providerReference String?        @map("provider_reference")
+  amount            Decimal        @db.Decimal(20, 2)
+  reason            String
+  status            TransferStatus @default(pending)
+  failureReason     String?        @map("failure_reason")
+  completedAt       DateTime?      @map("completed_at") @db.Timestamptz(3)
+  createdAt         DateTime       @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt         DateTime       @updatedAt @map("updated_at") @db.Timestamptz(3)
+  payment           Payment        @relation(fields: [paymentId], references: [id], onDelete: Restrict)
+  dispute           Dispute?       @relation(fields: [disputeId], references: [id], onDelete: Restrict)
+
+  @@index([paymentId, status])
+  @@index([disputeId])
+  @@map("refunds")
+}

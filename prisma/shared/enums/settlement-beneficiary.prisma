@@ -1,0 +1,4 @@
+enum SettlementBeneficiary {
+  seller
+  partner
+}

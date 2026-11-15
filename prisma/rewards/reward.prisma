@@ -1,0 +1,17 @@
+model Reward {
+  id          String       @id @default(uuid()) @db.Uuid
+  name        String
+  kind        RewardKind
+  costPoints  Int          @map("cost_points")
+  valueLabel  String       @map("value_label")
+  valueAmount Decimal?     @map("value_amount") @db.Decimal(20, 2)
+  automated   Boolean      @default(false)
+  stock       Int?
+  active      Boolean      @default(true)
+  createdAt   DateTime     @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt   DateTime     @updatedAt @map("updated_at") @db.Timestamptz(3)
+  redemptions Redemption[]
+
+  @@index([active, kind])
+  @@map("rewards")
+}

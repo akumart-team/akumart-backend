@@ -1,0 +1,31 @@
+model Redemption {
+  id                       String              @id @default(uuid()) @db.Uuid
+  profileId                String              @map("profile_id") @db.Uuid
+  rewardId                 String              @map("reward_id") @db.Uuid
+  rewardName               String              @map("reward_name")
+  kind                     RewardKind
+  costPoints               Int                 @map("cost_points")
+  valueAmount              Decimal?            @map("value_amount") @db.Decimal(20, 2)
+  currency                 String              @default("NGN") @db.Char(3)
+  recipientPhone           String?             @map("recipient_phone")
+  payoutRecipientReference String?             @map("payout_recipient_reference")
+  status                   RedemptionStatus    @default(pending_review)
+  reason                   String?
+  reviewedById             String?             @map("reviewed_by_id") @db.Uuid
+  reviewedAt               DateTime?           @map("reviewed_at") @db.Timestamptz(3)
+  idempotencyKey           String              @unique @map("idempotency_key")
+  provider                 String?
+  providerReference        String?             @map("provider_reference")
+  fulfilledAt              DateTime?           @map("fulfilled_at") @db.Timestamptz(3)
+  createdAt                DateTime            @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt                DateTime            @updatedAt @map("updated_at") @db.Timestamptz(3)
+  profile                  Profile             @relation(fields: [profileId], references: [id], onDelete: Restrict)
+  reward                   Reward              @relation(fields: [rewardId], references: [id], onDelete: Restrict)
+  ledgerEntries            PointsLedgerEntry[]
+
+  @@unique([provider, providerReference])
+  @@unique([id, profileId])
+  @@index([profileId, createdAt])
+  @@index([status, createdAt])
+  @@map("redemptions")
+}

@@ -1,0 +1,6 @@
+enum PaymentStatus {
+  pending
+  succeeded
+  failed
+  expired
+}

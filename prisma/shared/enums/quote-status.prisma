@@ -1,0 +1,6 @@
+enum QuoteStatus {
+  submitted
+  selected
+  declined
+  expired
+}

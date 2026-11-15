@@ -1,0 +1,12 @@
+model ListingImage {
+  listingId String  @map("listing_id") @db.Uuid
+  uploadId  String  @map("upload_id") @db.Uuid
+  position  Int     @default(0)
+  listing   Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  upload    Upload  @relation(fields: [uploadId], references: [id], onDelete: Restrict)
+
+  @@id([listingId, uploadId])
+  @@unique([listingId, position])
+  @@index([uploadId])
+  @@map("listing_images")
+}

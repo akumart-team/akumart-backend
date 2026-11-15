@@ -1,0 +1,7 @@
+enum OfferStatus {
+  awaiting_seller
+  awaiting_buyer
+  accepted
+  rejected
+  expired
+}

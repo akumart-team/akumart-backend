@@ -1,0 +1,14 @@
+model DeliveryProof {
+  id            String   @id @default(uuid()) @db.Uuid
+  orderId       String   @map("order_id") @db.Uuid
+  uploadId      String   @map("upload_id") @db.Uuid
+  submittedById String   @map("submitted_by_id") @db.Uuid
+  note          String?
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  order         Order    @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  upload        Upload   @relation(fields: [uploadId], references: [id], onDelete: Restrict)
+
+  @@unique([orderId, uploadId])
+  @@index([uploadId])
+  @@map("delivery_proofs")
+}

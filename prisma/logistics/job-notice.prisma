@@ -1,0 +1,13 @@
+model JobNotice {
+  orderId       String    @map("order_id") @db.Uuid
+  partnerId     String    @map("partner_id") @db.Uuid
+  declinedAt    DateTime? @map("declined_at") @db.Timestamptz(3)
+  declineReason String?   @map("decline_reason")
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  order         Order     @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  partner       Partner   @relation(fields: [partnerId], references: [id], onDelete: Restrict)
+
+  @@id([orderId, partnerId])
+  @@index([partnerId, declinedAt])
+  @@map("job_notices")
+}

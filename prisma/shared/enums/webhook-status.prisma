@@ -1,0 +1,6 @@
+enum WebhookStatus {
+  pending
+  processing
+  processed
+  failed
+}

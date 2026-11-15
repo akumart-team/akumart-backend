@@ -1,0 +1,5 @@
+enum RequestResponseStatus {
+  sent
+  shortlisted
+  declined
+}

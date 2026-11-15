@@ -1,0 +1,28 @@
+model Partner {
+  id           String               @id @default(uuid()) @db.Uuid
+  ownerId      String               @unique @map("owner_id") @db.Uuid
+  business     String
+  contact      String
+  email        String
+  phone        String               @db.VarChar(25)
+  base         String
+  serviceAreas String[]             @map("service_areas")
+  materials    Material[]
+  vehicles     String
+  vehicleCount Int                  @map("vehicle_count")
+  capacityKg   Decimal              @map("capacity_kg") @db.Decimal(18, 3)
+  status       PartnerStatus        @default(pending)
+  reason       String?
+  appliedAt    DateTime             @default(now()) @map("applied_at") @db.Timestamptz(3)
+  reviewedAt   DateTime?            @map("reviewed_at") @db.Timestamptz(3)
+  reviewedById String?              @map("reviewed_by_id") @db.Uuid
+  updatedAt    DateTime             @updatedAt @map("updated_at") @db.Timestamptz(3)
+  owner        Profile              @relation(fields: [ownerId], references: [id], onDelete: Restrict)
+  documents    PartnerDocument[]
+  notices      JobNotice[]
+  quotes       DeliveryQuote[]
+  assignments  DeliveryAssignment[]
+
+  @@index([status, appliedAt])
+  @@map("partners")
+}

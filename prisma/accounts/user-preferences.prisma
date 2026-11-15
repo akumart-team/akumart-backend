@@ -1,0 +1,11 @@
+model UserPreferences {
+  profileId  String      @id @map("profile_id") @db.Uuid
+  marketRole MarketRole  @default(none) @map("market_role")
+  akubin     Boolean     @default(true)
+  interests  Material[]  @default([])
+  activeMode MarketMode? @map("active_mode")
+  updatedAt  DateTime    @updatedAt @map("updated_at") @db.Timestamptz(3)
+  profile    Profile     @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@map("user_preferences")
+}

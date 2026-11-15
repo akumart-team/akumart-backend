@@ -1,0 +1,7 @@
+enum RecommendationAction {
+  impression
+  view
+  save
+  dismiss
+  contact
+}

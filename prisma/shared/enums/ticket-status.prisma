@@ -1,0 +1,5 @@
+enum TicketStatus {
+  open
+  assigned
+  resolved
+}
