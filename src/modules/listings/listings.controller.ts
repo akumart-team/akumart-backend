@@ -15,6 +15,7 @@ import {
 import { ApiTags } from '@nestjs/swagger';
 import {
   Authenticated,
+  OptionalBearerAuth,
   Staff,
   type AuthRequest,
 } from '../../common/platform/api';
@@ -35,7 +36,7 @@ export class ListingsController {
   @Get('listings') browse(@Query() q: ListingQuery) {
     return this.service.browse(q);
   }
-  @Get('listings/:id') @UseGuards(OptionalAuthGuard) detail(
+  @Get('listings/:id') @OptionalBearerAuth() @UseGuards(OptionalAuthGuard) detail(
     @Param('id', ParseUUIDPipe) id: string,
     @Req() r: AuthRequest,
   ) {

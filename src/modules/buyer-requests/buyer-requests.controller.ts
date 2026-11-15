@@ -15,7 +15,8 @@ import { PageQuery } from '../../common/platform/query.dto';
 import { BuyerRequestsService } from './buyer-requests.service';
 import {
   CreateBuyerRequestDto,
-  RequestResponseDto,
+  SendRequestResponseDto,
+  EditRequestResponseDto,
   ReviewRequestResponseDto,
 } from './dto/request.dto';
 @ApiTags('Buyer Requests')
@@ -47,9 +48,17 @@ export class BuyerRequestsController {
   @Post('buyer-requests/:id/responses') respond(
     @Req() r: AuthRequest,
     @Param('id', ParseUUIDPipe) id: string,
-    @Body() dto: RequestResponseDto,
+    @Body() dto: SendRequestResponseDto,
   ) {
     return this.service.respond(r.user.id, id, dto);
+  }
+  @Patch('buyer-requests/:id/responses/:responseId/terms') edit(
+    @Req() r: AuthRequest,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Param('responseId', ParseUUIDPipe) responseId: string,
+    @Body() dto: EditRequestResponseDto,
+  ) {
+    return this.service.edit(r.user.id, id, responseId, dto);
   }
   @Patch('buyer-requests/:id/responses/:responseId') review(
     @Req() r: AuthRequest,

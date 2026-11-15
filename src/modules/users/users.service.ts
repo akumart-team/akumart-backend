@@ -1,5 +1,9 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { DatabaseService } from '../../common/platform/database.service';
+import {
+  syncSignupProfile,
+  type SignupIdentity,
+} from '../../common/platform/signup-profile';
 import type {
   PreferencesDto,
   UpdatePreferencesDto,
@@ -8,7 +12,8 @@ import type {
 @Injectable()
 export class UsersService {
   constructor(private readonly db: DatabaseService) {}
-  async me(id: string) {
+  async me(id: string, identity?: SignupIdentity) {
+    if (identity) await syncSignupProfile(this.db.prisma, identity);
     return {
       data: await this.db.prisma.profile.findUniqueOrThrow({
         where: { id },
@@ -50,25 +55,61 @@ export class UsersService {
         const activeMode =
           dto.activeMode ??
           (marketRole === 'both'
-            ? (old.activeMode ?? 'seller')
-            : marketRole === 'none'
-              ? null
-              : marketRole);
+            ? (old.activeMode ?? 'buyer')
+            : marketRole === 'buyer' || marketRole === 'seller'
+              ? marketRole
+              : null);
         if (activeMode && marketRole !== 'both' && marketRole !== activeMode)
           throw new BadRequestException(
             'Active mode must match marketplace role.',
           );
         const preferences = await tx.userPreferences.update({
           where: { profileId: id },
-          data: { ...dto, activeMode },
+          data: {
+            marketRole,
+            activeMode,
+            akubin: true,
+            ...(dto.interests !== undefined
+              ? { interests: dto.interests }
+              : {}),
+          },
         });
+        if (dto.acceptedTerms === true) {
+          await tx.profile.updateMany({
+            where: { id, termsAcceptedAt: null },
+            data: {
+              termsAcceptedAt: await this.db.now(tx),
+              termsVersion: '1.0',
+            },
+          });
+        }
         if (onboard) {
           const profile = await tx.profile.findUniqueOrThrow({ where: { id } });
+          if (
+            !profile.firstName.trim() ||
+            !profile.lastName.trim() ||
+            !profile.displayName?.trim() ||
+            !profile.phone ||
+            !/^\+?\d{10,15}$/.test(profile.phone) ||
+            !profile.city ||
+            profile.city.trim().length < 2 ||
+            (!profile.termsAcceptedAt && dto.acceptedTerms !== true) ||
+            marketRole === 'none'
+          )
+            throw new BadRequestException(
+              'Complete your name, display name, phone, city, account role and accepted terms before finishing setup.',
+            );
           await tx.profile.update({
             where: { id },
             data: {
               profileCompleted: true,
               onboardedAt: profile.onboardedAt ?? (await this.db.now(tx)),
+              ...(!profile.termsAcceptedAt && dto.acceptedTerms === true
+                ? {
+                    termsAcceptedAt: await this.db.now(tx),
+                    termsVersion: '1.0',
+                  }
+                : {}),
             },
           });
         }

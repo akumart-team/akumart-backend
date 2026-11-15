@@ -8,7 +8,7 @@ import {
 import { Prisma } from '../../generated/prisma/client';
 import { DatabaseService } from '../../common/platform/database.service';
 import { TradePolicy } from '../../common/platform/trade-policy.service';
-import { PageQuery, paging, list } from '../../common/platform/query.dto';
+import { TradeListQuery, paging, list } from '../../common/platform/query.dto';
 import type { OfferTermsDto } from './dto/offer.dto';
 @Injectable()
 export class OffersService {
@@ -20,6 +20,7 @@ export class OffersService {
     return {
       data: await this.db.transaction(async (tx) => {
         await this.policy.require(user, 'basic', tx);
+        await tx.$queryRaw`SELECT id FROM listings WHERE id = ${listingId}::uuid FOR UPDATE`;
         const listing = await tx.listing.findUnique({
           where: { id: listingId },
         });
@@ -30,6 +31,22 @@ export class OffersService {
             'You cannot offer on your own listing.',
           );
         await this.policy.require(listing.sellerId, 'basic', tx);
+        const now = await this.db.now(tx);
+        const active = await tx.offer.findFirst({
+          where: {
+            listingId,
+            buyerId: user,
+            status: { in: ['awaiting_buyer', 'awaiting_seller'] },
+            expiresAt: { gt: now },
+          },
+          select: { id: true },
+        });
+        if (active)
+          throw new ConflictException({
+            message:
+              'You already have an active offer for this listing. Continue the negotiation with a counteroffer.',
+            offerId: active.id,
+          });
         const quantity = new Prisma.Decimal(dto.quantity);
         const available = listing.quantity
           .sub(listing.reservedQuantity)
@@ -41,7 +58,6 @@ export class OffersService {
           new Prisma.Decimal(dto.unitPrice).lte(0)
         )
           throw new BadRequestException('Invalid offer quantity or price.');
-        const now = await this.db.now(tx);
         const offer = await tx.offer.create({
           data: {
             listingId,
@@ -66,7 +82,7 @@ export class OffersService {
       }),
     };
   }
-  async own(user: string, q: PageQuery) {
+  async own(user: string, q: TradeListQuery) {
     await this.db.prisma.offer.updateMany({
       where: {
         OR: [{ buyerId: user }, { sellerId: user }],
@@ -75,7 +91,27 @@ export class OffersService {
       },
       data: { status: 'expired' },
     });
-    const where = { OR: [{ buyerId: user }, { sellerId: user }] };
+    const scope =
+      q.mode === 'buyer'
+        ? { buyerId: user }
+        : q.mode === 'seller'
+          ? { sellerId: user }
+          : { OR: [{ buyerId: user }, { sellerId: user }] };
+    const where: Prisma.OfferWhereInput = {
+      AND: [
+        scope,
+        ...(q.listingId ? [{ listingId: q.listingId }] : []),
+        ...(q.search
+          ? [
+              {
+                listing: {
+                  title: { contains: q.search, mode: 'insensitive' as const },
+                },
+              },
+            ]
+          : []),
+      ],
+    };
     const [data, total] = await this.db.prisma.$transaction([
       this.db.prisma.offer.findMany({
         where,

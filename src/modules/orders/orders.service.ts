@@ -10,7 +10,7 @@ import {
   DatabaseService,
   type Tx,
 } from '../../common/platform/database.service';
-import { PageQuery, list, paging } from '../../common/platform/query.dto';
+import { TradeListQuery, list, paging } from '../../common/platform/query.dto';
 import { UploadsService } from '../uploads/uploads.service';
 import { FulfilmentDto, ReviewDto, DisputeDto } from './dto/order.dto';
 import { fareEstimate, kilograms } from '../../common/platform/order-math';
@@ -32,8 +32,42 @@ export class OrdersService {
     if (!row) throw new NotFoundException('Order not found.');
     return row;
   }
-  async own(user: string, q: PageQuery) {
-    const where = { OR: [{ buyerId: user }, { sellerId: user }] };
+  async own(user: string, q: TradeListQuery) {
+    const scope =
+      q.mode === 'buyer'
+        ? { buyerId: user }
+        : q.mode === 'seller'
+          ? { sellerId: user }
+          : { OR: [{ buyerId: user }, { sellerId: user }] };
+    const where: Prisma.OrderWhereInput = {
+      AND: [
+        scope,
+        ...(q.listingId ? [{ listingId: q.listingId }] : []),
+        ...(q.search
+          ? [
+              {
+                OR: [
+                  {
+                    title: { contains: q.search, mode: 'insensitive' as const },
+                  },
+                  {
+                    pickupCity: {
+                      contains: q.search,
+                      mode: 'insensitive' as const,
+                    },
+                  },
+                  {
+                    destination: {
+                      contains: q.search,
+                      mode: 'insensitive' as const,
+                    },
+                  },
+                ],
+              },
+            ]
+          : []),
+      ],
+    };
     const [rows, total] = await this.db.prisma.$transaction([
       this.db.prisma.order.findMany({
         where,

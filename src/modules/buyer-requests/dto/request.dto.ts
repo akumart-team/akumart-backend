@@ -1,6 +1,7 @@
 import {
   IsEnum,
   IsISO8601,
+  IsOptional,
   IsString,
   MaxLength,
   MinLength,
@@ -27,4 +28,11 @@ export class RequestResponseDto {
 }
 export class ReviewRequestResponseDto {
   @IsEnum(RequestResponseStatus) status: RequestResponseStatus;
+  @IsOptional() @IsISO8601() expectedUpdatedAt?: string;
+}
+export class SendRequestResponseDto extends RequestResponseDto {
+  @IsOptional() @IsISO8601() expectedUpdatedAt?: string;
+}
+export class EditRequestResponseDto extends RequestResponseDto {
+  @IsISO8601() expectedUpdatedAt: string;
 }

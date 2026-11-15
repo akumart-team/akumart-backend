@@ -540,11 +540,7 @@
               "minimum": 1,
               "maximum": 1000000,
               "default": 1,
-              "allOf": [
-                {
-                  "$ref": "#/components/schemas/Object"
-                }
-              ]
+              "type": "number"
             }
           },
           {
@@ -555,11 +551,7 @@
               "minimum": 1,
               "maximum": 100,
               "default": 20,
-              "allOf": [
-                {
-                  "$ref": "#/components/schemas/Object"
-                }
-              ]
+              "type": "number"
             }
           },
           {
@@ -627,11 +619,7 @@
               "minimum": 1,
               "maximum": 1000000,
               "default": 1,
-              "allOf": [
-                {
-                  "$ref": "#/components/schemas/Object"
-                }
-              ]
+              "type": "number"
             }
           },
           {
@@ -642,11 +630,7 @@
               "minimum": 1,
               "maximum": 100,
               "default": 20,
-              "allOf": [
-                {
-                  "$ref": "#/components/schemas/Object"
-                }
-              ]
+              "type": "number"
             }
           },
           {
@@ -777,11 +761,7 @@
               "minimum": 1,
               "maximum": 1000000,
               "default": 1,
-              "allOf": [
-                {
-                  "$ref": "#/components/schemas/Object"
-                }
-              ]
+              "type": "number"
             }
           },
           {
@@ -792,11 +772,7 @@
               "minimum": 1,
               "maximum": 100,
               "default": 20,
-              "allOf": [
-                {
-                  "$ref": "#/components/schemas/Object"
-                }
-              ]
+              "type": "number"
             }
           }
         ],
@@ -823,11 +799,7 @@
               "minimum": 1,
               "maximum": 1000000,
               "default": 1,
-              "allOf": [
-                {
-                  "$ref": "#/components/schemas/Object"
-                }
-              ]
+              "type": "number"
             }
           },
           {
@@ -838,11 +810,7 @@
               "minimum": 1,
               "maximum": 100,
               "default": 20,
-              "allOf": [
-                {
-                  "$ref": "#/components/schemas/Object"
-                }
-              ]
+              "type": "number"
             }
           },
           {
@@ -891,17 +859,9 @@
         "parameters": [
           {
             "name": "x-akubin-device-key",
-            "required": true,
-            "in": "header",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "X-Akubin-Device-Key",
+            "required": false,
             "in": "header",
             "description": "Required for authenticated controllers; omitted by explicitly enabled legacy firmware",
-            "required": false,
             "schema": {
               "type": "string"
             }
@@ -942,16 +902,8 @@
           },
           {
             "name": "x-akubin-device-key",
-            "required": true,
-            "in": "header",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "X-Akubin-Device-Key",
-            "in": "header",
             "required": false,
+            "in": "header",
             "schema": {
               "type": "string"
             }
@@ -1078,11 +1030,7 @@
               "minimum": 1,
               "maximum": 1000000,
               "default": 1,
-              "allOf": [
-                {
-                  "$ref": "#/components/schemas/Object"
-                }
-              ]
+              "type": "number"
             }
           },
           {
@@ -1093,11 +1041,7 @@
               "minimum": 1,
               "maximum": 100,
               "default": 20,
-              "allOf": [
-                {
-                  "$ref": "#/components/schemas/Object"
-                }
-              ]
+              "type": "number"
             }
           }
         ],
@@ -1129,11 +1073,7 @@
               "minimum": 1,
               "maximum": 1000000,
               "default": 1,
-              "allOf": [
-                {
-                  "$ref": "#/components/schemas/Object"
-                }
-              ]
+              "type": "number"
             }
           },
           {
@@ -1144,11 +1084,7 @@
               "minimum": 1,
               "maximum": 100,
               "default": 20,
-              "allOf": [
-                {
-                  "$ref": "#/components/schemas/Object"
-                }
-              ]
+              "type": "number"
             }
           }
         ],
@@ -1180,11 +1116,7 @@
               "minimum": 1,
               "maximum": 1000000,
               "default": 1,
-              "allOf": [
-                {
-                  "$ref": "#/components/schemas/Object"
-                }
-              ]
+              "type": "number"
             }
           },
           {
@@ -1195,11 +1127,7 @@
               "minimum": 1,
               "maximum": 100,
               "default": 20,
-              "allOf": [
-                {
-                  "$ref": "#/components/schemas/Object"
-                }
-              ]
+              "type": "number"
             }
           }
         ],
@@ -1289,11 +1217,7 @@
               "minimum": 1,
               "maximum": 1000000,
               "default": 1,
-              "allOf": [
-                {
-                  "$ref": "#/components/schemas/Object"
-                }
-              ]
+              "type": "number"
             }
           },
           {
@@ -1304,11 +1228,7 @@
               "minimum": 1,
               "maximum": 100,
               "default": 20,
-              "allOf": [
-                {
-                  "$ref": "#/components/schemas/Object"
-                }
-              ]
+              "type": "number"
             }
           }
         ],
@@ -1370,11 +1290,7 @@
               "minimum": 1,
               "maximum": 1000000,
               "default": 1,
-              "allOf": [
-                {
-                  "$ref": "#/components/schemas/Object"
-                }
-              ]
+              "type": "number"
             }
           },
           {
@@ -1385,11 +1301,7 @@
               "minimum": 1,
               "maximum": 100,
               "default": 20,
-              "allOf": [
-                {
-                  "$ref": "#/components/schemas/Object"
-                }
-              ]
+              "type": "number"
             }
           },
           {
@@ -1632,11 +1544,7 @@
               "minimum": 1,
               "maximum": 1000000,
               "default": 1,
-              "allOf": [
-                {
-                  "$ref": "#/components/schemas/Object"
-                }
-              ]
+              "type": "number"
             }
           },
           {
@@ -1647,11 +1555,7 @@
               "minimum": 1,
               "maximum": 100,
               "default": 20,
-              "allOf": [
-                {
-                  "$ref": "#/components/schemas/Object"
-                }
-              ]
+              "type": "number"
             }
           }
         ],
@@ -1698,11 +1602,7 @@
               "minimum": 1,
               "maximum": 1000000,
               "default": 1,
-              "allOf": [
-                {
-                  "$ref": "#/components/schemas/Object"
-                }
-              ]
+              "type": "number"
             }
           },
           {
@@ -1713,11 +1613,7 @@
               "minimum": 1,
               "maximum": 100,
               "default": 20,
-              "allOf": [
-                {
-                  "$ref": "#/components/schemas/Object"
-                }
-              ]
+              "type": "number"
             }
           }
         ],
@@ -1803,11 +1699,7 @@
               "minimum": 1,
               "maximum": 1000000,
               "default": 1,
-              "allOf": [
-                {
-                  "$ref": "#/components/schemas/Object"
-                }
-              ]
+              "type": "number"
             }
           },
           {
@@ -1818,11 +1710,7 @@
               "minimum": 1,
               "maximum": 100,
               "default": 20,
-              "allOf": [
-                {
-                  "$ref": "#/components/schemas/Object"
-                }
-              ]
+              "type": "number"
             }
           }
         ],
@@ -2024,11 +1912,7 @@
               "minimum": 1,
               "maximum": 1000000,
               "default": 1,
-              "allOf": [
-                {
-                  "$ref": "#/components/schemas/Object"
-                }
-              ]
+              "type": "number"
             }
           },
           {
@@ -2039,11 +1923,7 @@
               "minimum": 1,
               "maximum": 100,
               "default": 20,
-              "allOf": [
-                {
-                  "$ref": "#/components/schemas/Object"
-                }
-              ]
+              "type": "number"
             }
           }
         ],
@@ -2147,16 +2027,8 @@
         "parameters": [
           {
             "name": "x-akubin-device-key",
-            "required": true,
-            "in": "header",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "X-Akubin-Device-Key",
-            "in": "header",
             "required": false,
+            "in": "header",
             "schema": {
               "type": "string"
             }
@@ -2423,6 +2295,12 @@
             "description": ""
           }
         },
+        "security": [
+          {
+            "bearer": []
+          },
+          {}
+        ],
         "tags": [
           "Support"
         ]
@@ -2703,6 +2581,12 @@
             "description": ""
           }
         },
+        "security": [
+          {
+            "bearer": []
+          },
+          {}
+        ],
         "tags": [
           "Uploads"
         ]
@@ -3002,6 +2886,12 @@
             "description": ""
           }
         },
+        "security": [
+          {
+            "bearer": []
+          },
+          {}
+        ],
         "tags": [
           "Listings"
         ]
@@ -5852,6 +5742,12 @@
             "description": ""
           }
         },
+        "security": [
+          {
+            "bearer": []
+          },
+          {}
+        ],
         "tags": [
           "Recommendations"
         ]
@@ -5889,6 +5785,12 @@
             "description": ""
           }
         },
+        "security": [
+          {
+            "bearer": []
+          },
+          {}
+        ],
         "tags": [
           "Recommendations"
         ]
@@ -5970,6 +5872,12 @@
             "description": ""
           }
         },
+        "security": [
+          {
+            "bearer": []
+          },
+          {}
+        ],
         "tags": [
           "Assistant"
         ]
@@ -6001,8 +5909,125 @@
             "description": ""
           }
         },
+        "security": [
+          {
+            "bearer": []
+          },
+          {}
+        ],
         "tags": [
           "Assistant"
+        ]
+      }
+    },
+    "/api/v1/admin/staff/bootstrap": {
+      "post": {
+        "operationId": "AdminController_bootstrapStaff_v1",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create the first super staff membership; requires the server-configured verified profile and no previous super",
+        "tags": [
+          "Administration"
+        ]
+      }
+    },
+    "/api/v1/admin/staff": {
+      "get": {
+        "operationId": "AdminController_staffMembers_v1",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 1000000,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "maxLength": 100,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List and search staff memberships, including inactive access",
+        "tags": [
+          "Administration"
+        ]
+      }
+    },
+    "/api/v1/admin/staff/{profileId}": {
+      "put": {
+        "operationId": "AdminController_assignStaff_v1",
+        "parameters": [
+          {
+            "name": "profileId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssignStaffDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Assign, change or deactivate a staff role; audited and protects the last active super",
+        "tags": [
+          "Administration"
         ]
       }
     },
@@ -6522,7 +6547,8 @@
           "code": {
             "type": "string",
             "minLength": 6,
-            "maxLength": 6
+            "maxLength": 8,
+            "pattern": "^\\d{6,8}$"
           }
         },
         "required": [
@@ -6602,7 +6628,8 @@
           "code": {
             "type": "string",
             "minLength": 6,
-            "maxLength": 6
+            "maxLength": 8,
+            "pattern": "^\\d{6,8}$"
           },
           "newPassword": {
             "type": "string",
@@ -6633,10 +6660,6 @@
           "accessToken",
           "refreshToken"
         ]
-      },
-      "Object": {
-        "type": "object",
-        "properties": {}
       },
       "StartBinSessionDto": {
         "type": "object",
@@ -8457,6 +8480,35 @@
         },
         "required": [
           "message"
+        ]
+      },
+      "AssignStaffDto": {
+        "type": "object",
+        "properties": {
+          "role": {
+            "enum": [
+              "super",
+              "operations",
+              "support",
+              "finance",
+              "content"
+            ],
+            "type": "string"
+          },
+          "active": {
+            "type": "boolean",
+            "description": "False disables staff access without deleting history."
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 5,
+            "maxLength": 1000
+          }
+        },
+        "required": [
+          "role",
+          "active",
+          "reason"
         ]
       },
       "SettingsDto": {

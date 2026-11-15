@@ -12,6 +12,7 @@
     "test:schema": "node --test test/schema-integrity.test.cjs",
     "test:akubin": "nest build && node --test test/akubin.e2e.test.cjs",
     "test:platform": "nest build && node --test test/platform.e2e.test.cjs",
+    "test:staff": "nest build && node --test test/staff.e2e.test.cjs",
     "api:export": "nest build && node scripts/export-openapi.cjs",
     "build": "nest build",
     "deploy": "nest deploy",

@@ -13,7 +13,7 @@ import {
 import { ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Throttle } from '@nestjs/throttler';
-import { Authenticated, type AuthRequest } from '../../common/platform/api';
+import { Authenticated, OptionalBearerAuth, type AuthRequest } from '../../common/platform/api';
 import { OptionalAuthGuard } from '../../common/platform/optional-auth.guard';
 import { UploadsService } from './uploads.service';
 import { UploadDto, type IncomingFile } from './dto/upload.dto';
@@ -48,6 +48,7 @@ export class UploadsController {
     return this.service.create(r.user.id, dto.purpose, file);
   }
   @Get(':id/access')
+  @OptionalBearerAuth()
   @UseGuards(OptionalAuthGuard)
   access(@Req() r: AuthRequest, @Param('id', ParseUUIDPipe) id: string) {
     return this.service.access(id, r.user?.id);

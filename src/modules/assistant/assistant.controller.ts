@@ -12,10 +12,11 @@ import {
 import { ApiTags } from '@nestjs/swagger';
 import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
 import { OptionalAuthGuard } from '../../common/platform/optional-auth.guard';
-import type { AuthRequest } from '../../common/platform/api';
+import { OptionalBearerAuth, type AuthRequest } from '../../common/platform/api';
 import { AssistantMessageDto } from './dto/assistant.dto';
 import { AssistantService } from './assistant.service';
 @ApiTags('Assistant')
+@OptionalBearerAuth()
 @Controller({ path: 'assistant', version: '1' })
 @UseGuards(OptionalAuthGuard, ThrottlerGuard)
 @Throttle({ default: { limit: 10, ttl: 60000 } })

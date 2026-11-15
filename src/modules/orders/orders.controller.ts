@@ -10,7 +10,7 @@ import {
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { Authenticated, type AuthRequest } from '../../common/platform/api';
-import { PageQuery } from '../../common/platform/query.dto';
+import { TradeListQuery } from '../../common/platform/query.dto';
 import { OrdersService } from './orders.service';
 import {
   FulfilmentDto,
@@ -23,7 +23,7 @@ import {
 @Authenticated()
 export class OrdersController {
   constructor(private readonly service: OrdersService) {}
-  @Get() list(@Req() r: AuthRequest, @Query() q: PageQuery) {
+  @Get() list(@Req() r: AuthRequest, @Query() q: TradeListQuery) {
     return this.service.own(r.user.id, q);
   }
   @Get(':id') detail(

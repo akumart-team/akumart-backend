@@ -716,6 +716,17 @@ test(
         );
         assert.ok(doc.paths[`${prefix}/akubin/sessions/phone-pin`]);
         assert.ok(doc.paths[`${prefix}/webhooks/akubin-telemetry`]);
+        for (const route of [
+          `${prefix}/akubin/sessions/phone-pin`,
+          `${prefix}/akubin/sessions/{id}/deposits`,
+          `${prefix}/webhooks/akubin-telemetry`,
+        ]) {
+          const headers = doc.paths[route].post.parameters.filter(
+            parameter => parameter.in === 'header' && parameter.name.toLowerCase() === 'x-akubin-device-key',
+          );
+          assert.equal(headers.length, 1, `${route}: duplicate device headers`);
+          assert.equal(headers[0].required, false, `${route}: legacy firmware must be able to omit the header`);
+        }
         assert.ok(
           doc.paths[`${prefix}/admin/akubin/redemptions/{id}/decision`],
         );

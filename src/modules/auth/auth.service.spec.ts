@@ -9,6 +9,7 @@ describe('AuthService password reset and logout', () => {
   let verifyOtp: jest.Mock;
   let updateUserById: jest.Mock;
   let signOut: jest.Mock;
+  let resetPasswordForEmail: jest.Mock;
 
   beforeEach(() => {
     verifyOtp = jest.fn().mockResolvedValue({
@@ -17,11 +18,22 @@ describe('AuthService password reset and logout', () => {
     });
     updateUserById = jest.fn().mockResolvedValue({ error: null });
     signOut = jest.fn().mockResolvedValue({ error: null });
+    resetPasswordForEmail = jest.fn().mockResolvedValue({ error: null });
     const supabase = {
-      client: () => ({ auth: { verifyOtp } }),
+      client: () => ({ auth: { verifyOtp, resetPasswordForEmail } }),
       admin: { auth: { admin: { updateUserById, signOut } } },
     };
     service = new AuthService(supabase as unknown as SupabaseService, {} as PrismaService);
+  });
+
+  it('does not report that a reset email was sent when the provider fails', async () => {
+    resetPasswordForEmail.mockResolvedValue({ error: { status: 429, code: 'over_email_send_rate_limit', name: 'AuthApiError' } });
+    await expect(service.forgotPassword(dto.email)).rejects.toBeInstanceOf(ServiceUnavailableException);
+  });
+
+  it('keeps the generic account response when the reset request is accepted', async () => {
+    await expect(service.forgotPassword(dto.email)).resolves.toEqual({ message: 'If the account exists, a reset code has been sent.' });
+    expect(resetPasswordForEmail).toHaveBeenCalledWith(dto.email);
   });
 
   it('rejects an invalid recovery code without changing the password', async () => {

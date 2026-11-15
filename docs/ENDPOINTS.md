@@ -15,6 +15,9 @@ Generated with `npm run api:export`. Request schemas are in [openapi.json](opena
 | Administration | GET | `/api/v1/admin/settings` | Bearer | — |
 | Administration | PATCH | `/api/v1/admin/settings` | Bearer | SettingsDto |
 | Administration | POST | `/api/v1/admin/settings` | Bearer | — |
+| Administration | GET | `/api/v1/admin/staff` | Bearer | — |
+| Administration | PUT | `/api/v1/admin/staff/{profileId}` | Bearer | AssignStaffDto |
+| Administration | POST | `/api/v1/admin/staff/bootstrap` | Bearer | — |
 | Administration | GET | `/api/v1/admin/users` | Bearer | — |
 | Administration | GET | `/api/v1/admin/users/{id}` | Bearer | — |
 | Advertising | GET | `/api/v1/admin/advertising/campaigns` | Bearer | — |
@@ -179,4 +182,4 @@ Generated with `npm run api:export`. Request schemas are in [openapi.json](opena
 | Verification | GET | `/api/v1/users/me/verification` | Bearer | — |
 | Verification | POST | `/api/v1/users/me/verification/submissions` | Bearer | SubmitVerificationDto |
 
-Total: 174 operations.
+Total: 177 operations.
