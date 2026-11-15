@@ -6,7 +6,12 @@ import { PlatformStaffGuard, StaffRoles } from './staff.guard';
 import type { StaffRole } from '../../generated/prisma/enums';
 import type { Request } from 'express';
 export type AuthRequest = Request & {
-  user: { id: string; email?: string; email_confirmed_at?: string };
+  user: {
+    id: string;
+    email?: string;
+    email_confirmed_at?: string;
+    user_metadata?: Record<string, unknown>;
+  };
   accessToken: string;
 };
 // Prefer the authorized bearer in Swagger while documenting anonymous access too.

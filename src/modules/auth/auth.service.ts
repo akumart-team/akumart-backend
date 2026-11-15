@@ -15,6 +15,7 @@ import {
   OAuthCallbackDto,
 } from './dto';
 import { PrismaService } from '../../integrations/database/prisma.service';
+import { syncSignupProfile } from '../../common/platform/signup-profile';
 
 @Injectable()
 export class AuthService {
@@ -36,7 +37,7 @@ export class AuthService {
           phone: dto.phone,
           city: dto.city,
           market_role: dto.marketRole,
-          akubin: dto.akubin,
+          akubin: true,
           terms_accepted_at: new Date().toISOString(),
           terms_version: '1.0',
         },
@@ -56,31 +57,7 @@ export class AuthService {
     });
     if (error || !data.session)
       throw new BadRequestException('Invalid or expired code');
-    // Save verified signup details atomically before exposing the account session.
-    // This never changes Marketplace role, staff access or partner approval.
-    const metadata = data.session.user.user_metadata;
-    const akubin = metadata?.akubin;
-    const displayName =
-      typeof metadata?.display_name === 'string'
-        ? metadata.display_name.trim()
-        : '';
-    if (
-      typeof akubin === 'boolean' ||
-      (displayName.length > 0 && displayName.length <= 100)
-    ) {
-      await this.prisma.$transaction(async (tx) => {
-        if (displayName.length > 0 && displayName.length <= 100)
-          await tx.profile.update({
-            where: { id: data.session!.user.id },
-            data: { displayName },
-          });
-        if (typeof akubin === 'boolean')
-          await tx.userPreferences.update({
-            where: { profileId: data.session!.user.id },
-            data: { akubin },
-          });
-      });
-    }
+    await syncSignupProfile(this.prisma, data.session.user, true);
     return data.session;
   }
 
@@ -98,6 +75,7 @@ export class AuthService {
         'Invalid email or password, or email not verified',
       );
     }
+    await syncSignupProfile(this.prisma, data.session.user);
     return data.session;
   }
 

@@ -1,5 +1,9 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { DatabaseService } from '../../common/platform/database.service';
+import {
+  syncSignupProfile,
+  type SignupIdentity,
+} from '../../common/platform/signup-profile';
 import type {
   PreferencesDto,
   UpdatePreferencesDto,
@@ -8,7 +12,8 @@ import type {
 @Injectable()
 export class UsersService {
   constructor(private readonly db: DatabaseService) {}
-  async me(id: string) {
+  async me(id: string, identity?: SignupIdentity) {
+    if (identity) await syncSignupProfile(this.db.prisma, identity);
     return {
       data: await this.db.prisma.profile.findUniqueOrThrow({
         where: { id },
@@ -63,12 +68,21 @@ export class UsersService {
           data: {
             marketRole,
             activeMode,
-            ...(dto.akubin !== undefined ? { akubin: dto.akubin } : {}),
+            akubin: true,
             ...(dto.interests !== undefined
               ? { interests: dto.interests }
               : {}),
           },
         });
+        if (dto.acceptedTerms === true) {
+          await tx.profile.updateMany({
+            where: { id, termsAcceptedAt: null },
+            data: {
+              termsAcceptedAt: await this.db.now(tx),
+              termsVersion: '1.0',
+            },
+          });
+        }
         if (onboard) {
           const profile = await tx.profile.findUniqueOrThrow({ where: { id } });
           if (

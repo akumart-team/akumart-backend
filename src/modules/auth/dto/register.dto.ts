@@ -12,7 +12,13 @@ import {
   MinLength,
 } from 'class-validator';
 
-export const SIGNUP_ROLES = ['buyer', 'seller', 'both', 'logistics'] as const;
+export const SIGNUP_ROLES = [
+  'buyer',
+  'seller',
+  'both',
+  'logistics',
+  'recycler',
+] as const;
 export type SignupRole = (typeof SIGNUP_ROLES)[number];
 const trim = ({ value }: { value: unknown }) =>
   typeof value === 'string' ? value.trim() : value;
@@ -56,7 +62,7 @@ export class RegisterDto {
 
   @ApiProperty({ enum: SIGNUP_ROLES })
   @IsIn(SIGNUP_ROLES, {
-    message: 'Choose buyer, seller, both or logistics.',
+    message: 'Choose buyer, seller, both, logistics or recycler.',
   })
   marketRole: SignupRole;
 

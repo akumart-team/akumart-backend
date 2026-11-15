@@ -13,7 +13,7 @@ import {
 export class UsersController {
   constructor(private readonly users: UsersService) {}
   @Get() me(@Req() r: AuthRequest) {
-    return this.users.me(r.user.id);
+    return this.users.me(r.user.id, r.user);
   }
   @Patch() update(@Req() r: AuthRequest, @Body() dto: UpdateProfileDto) {
     return this.users.update(r.user.id, dto);

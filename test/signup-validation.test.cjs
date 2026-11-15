@@ -45,7 +45,6 @@ test('signup rejects missing required values, invalid role/contact and unaccepte
     ['phone', '080'],
     ['email', 'invalid'],
     ['marketRole', 'none'],
-    ['marketRole', 'recycler'],
     ['akubin', 'yes'],
     ['marketRole', 'super'],
     ['marketRole', 'operations'],
@@ -59,8 +58,8 @@ test('signup rejects missing required values, invalid role/contact and unaccepte
       ),
     );
 });
-test('four signup roles reach Supabase as ordinary metadata with an independent AkuBin choice', async () => {
-  for (const role of ['buyer', 'seller', 'both', 'logistics']) {
+test('five signup roles reach Supabase as ordinary metadata with an independent AkuBin choice', async () => {
+  for (const role of ['buyer', 'seller', 'both', 'logistics', 'recycler']) {
     let sent;
     const provider = {
       client: () => ({
@@ -82,10 +81,10 @@ test('four signup roles reach Supabase as ordinary metadata with an independent 
     assert.equal(sent.options.data.city, 'Lagos');
     assert.equal(sent.options.data.phone, valid.phone);
     assert.equal(sent.options.data.staff, undefined);
-    assert.equal(sent.options.data.akubin, false);
+    assert.equal(sent.options.data.akubin, true);
   }
 });
-test('email verification saves either AkuBin choice without changing the account role', async () => {
+test('email verification recovers display name and always includes AkuBin without changing role', async () => {
   for (const akubin of [true, false]) {
     const session = {
       user: {
@@ -102,7 +101,9 @@ test('email verification saves either AkuBin choice without changing the account
     const service = new AuthService(provider, {
       $transaction: async (fn) =>
         fn({
+          $queryRaw: async () => [],
           profile: {
+            findUniqueOrThrow: async () => ({firstName:"",lastName:"",displayName:null,phone:null,city:null,termsAcceptedAt:null,preferences:{marketRole:"buyer",akubin:false}}),
             update: async (value) => {
               savedProfile = value;
             },
@@ -123,7 +124,7 @@ test('email verification saves either AkuBin choice without changing the account
     );
     assert.deepEqual(saved, {
       where: { profileId: 'verified-user' },
-      data: { akubin },
+      data: { akubin: true },
     });
     assert.deepEqual(savedProfile, {
       where: { id: 'verified-user' },

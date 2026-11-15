@@ -95,12 +95,14 @@ test(
         'buyer',
         'outsider',
         'driver',
+        'recycler',
         'operations',
         'finance',
         'content',
         'super',
       ].map((k) => [k, randomUUID()]),
     );
+    const signupIdentity = {};
     for (const [name, id] of Object.entries(identities)) {
       await prisma.$executeRaw`INSERT INTO auth.users(id,email,raw_user_meta_data) VALUES (${id}::uuid, ${`${name}@example.test`}, ${JSON.stringify({ first_name: name, terms_accepted_at: new Date().toISOString(), terms_version: '1.0' })}::jsonb)`;
       await prisma.profile.update({ where: { id }, data: { city: 'Lagos', lastName: 'Test', displayName:name+' Test', phone: '+2348012345678' } });
@@ -154,7 +156,7 @@ test(
             getUser: async (token) => ({
               data: {
                 user: Object.values(identities).includes(token)
-                  ? { id: token }
+                  ? { id: token, ...signupIdentity[token] }
                   : null,
               },
               error: null,
@@ -315,11 +317,11 @@ test(
         await invoke('post', '/users/me/onboarding/complete', 'outsider', { marketRole: 'buyer', akubin: true, interests: [], acceptedTerms:true });
         const consenting = (await invoke('get','/users/me','outsider')).data;
         assert.ok(consenting.termsAcceptedAt);assert.equal(consenting.preferences.marketRole,'buyer');
-        for (const marketRole of ['buyer','seller','both','logistics']) {
+        for (const marketRole of ['buyer','seller','both','logistics','recycler']) {
           for (const akubin of [false,true]) {
             await invoke('patch','/users/me/preferences','outsider',{marketRole,akubin});
             const profile=(await invoke('get','/users/me','outsider')).data;
-            assert.equal(profile.preferences.marketRole,marketRole);assert.equal(profile.preferences.akubin,akubin);assert.equal(profile.staff,null);assert.equal(profile.partner,null);
+            assert.equal(profile.preferences.marketRole,marketRole);assert.equal(profile.preferences.akubin,true);assert.equal(profile.staff,null);assert.equal(profile.partner,null);
           }
         }
         const id = await upload('buyer', 'verification_document');
@@ -367,6 +369,32 @@ test(
         assert.equal(await prisma.verificationEvent.count(), 8);
       },
     );
+    await t.test('verified signup recovers missing profile details once and preserves later edits', async () => {
+      const id=identities.recycler;
+      signupIdentity[id]={email_confirmed_at:new Date().toISOString(),user_metadata:{
+        first_name:' Ada ',last_name:' Obi ',display_name:' Ada Recycles ',
+        phone:'+2348012345678',city:' Lagos ',market_role:'recycler',akubin:false,
+        staff:'super',partner_status:'approved'
+      }};
+      await prisma.profile.update({where:{id},data:{firstName:'',lastName:'',displayName:null,phone:null,city:null,profileCompleted:false,onboardedAt:null}});
+      const recovered=(await invoke('get','/users/me','recycler')).data;
+      assert.equal(recovered.firstName,'Ada');assert.equal(recovered.lastName,'Obi');
+      assert.equal(recovered.displayName,'Ada Recycles');assert.equal(recovered.city,'Lagos');
+      assert.equal(recovered.phone,'+2348012345678');assert.equal(recovered.preferences.marketRole,'recycler');
+      assert.equal(recovered.preferences.akubin,true);assert.equal(recovered.preferences.activeMode,null);
+      assert.equal(recovered.profileCompleted,true);assert.ok(recovered.onboardedAt);
+      assert.equal(recovered.staff,null);assert.equal(recovered.partner,null);
+      await invoke('patch','/users/me','recycler',{displayName:'Edited Display',city:'Abuja'});
+      await invoke('patch','/users/me/preferences','recycler',{marketRole:'seller',akubin:false});
+      const again=(await invoke('get','/users/me','recycler')).data;
+      assert.equal(again.displayName,'Edited Display');assert.equal(again.city,'Abuja');
+      assert.equal(again.preferences.marketRole,'seller');assert.equal(again.preferences.activeMode,'seller');
+      assert.equal(again.onboardedAt,recovered.onboardedAt);
+      await prisma.profile.update({where:{id},data:{displayName:null}});
+      signupIdentity[id].email_confirmed_at=undefined;
+      const unconfirmed=(await invoke('get','/users/me','recycler')).data;
+      assert.equal(unconfirmed.displayName,null);
+    });
     await t.test(
       'listings, attachment ownership, negotiation and atomic stock reservation',
       async () => {
