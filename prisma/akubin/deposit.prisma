@@ -1,0 +1,32 @@
+model Deposit {
+  id               String             @id @default(uuid()) @db.Uuid
+  sessionId        String             @map("session_id") @db.Uuid
+  profileId        String             @map("profile_id") @db.Uuid
+  binId            String             @map("bin_id") @db.Uuid
+  deviceId         String             @map("device_id") @db.Uuid
+  deviceEventId    String             @map("device_event_id")
+  material         Material
+  measure          DepositMeasure
+  amount           Decimal            @db.Decimal(18, 3)
+  weightKg         Decimal            @map("weight_kg") @db.Decimal(18, 6)
+  status           DepositStatus
+  rejectionReason  String?            @map("rejection_reason")
+  awardedPoints    Decimal            @default(0) @map("awarded_points") @db.Decimal(18, 6)
+  // Snapshot the conversion rule used, so later settings edits do not rewrite history.
+  pointsRate       Decimal            @map("points_rate") @db.Decimal(18, 6)
+  itemKgEquivalent Decimal?           @map("item_kg_equivalent") @db.Decimal(18, 6)
+  // Hardware does not supply wall-clock measurement time; createdAt is server receipt time.
+  measuredAt       DateTime?          @map("measured_at") @db.Timestamptz(3)
+  createdAt        DateTime           @default(now()) @map("created_at") @db.Timestamptz(3)
+  session          BinSession         @relation(fields: [sessionId, binId, profileId, deviceId], references: [id, binId, profileId, deviceId], onDelete: Restrict, onUpdate: Restrict)
+  bin              Bin                @relation(fields: [binId], references: [id], onDelete: Restrict)
+  device           BinDevice          @relation(fields: [deviceId, binId], references: [id, binId], onDelete: Restrict, onUpdate: Restrict)
+  profile          Profile            @relation(fields: [profileId], references: [id], onDelete: Restrict)
+  ledgerEntry      PointsLedgerEntry?
+
+  @@unique([deviceId, deviceEventId])
+  @@unique([id, profileId])
+  @@index([sessionId, createdAt])
+  @@index([binId, measuredAt])
+  @@map("deposits")
+}

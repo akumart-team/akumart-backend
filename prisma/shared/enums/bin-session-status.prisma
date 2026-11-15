@@ -1,0 +1,6 @@
+enum BinSessionStatus {
+  active
+  ended
+  expired
+  revoked
+}

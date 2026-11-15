@@ -1,0 +1,11 @@
+model SavedListing {
+  profileId String   @map("profile_id") @db.Uuid
+  listingId String   @map("listing_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  profile   Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  listing   Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  @@id([profileId, listingId])
+  @@index([listingId])
+  @@map("saved_listings")
+}

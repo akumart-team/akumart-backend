@@ -1,0 +1,11 @@
+model VerificationDocument {
+  submissionId String                 @map("submission_id") @db.Uuid
+  uploadId     String                 @map("upload_id") @db.Uuid
+  kind         String                 @db.VarChar(80)
+  submission   VerificationSubmission @relation(fields: [submissionId], references: [id], onDelete: Restrict)
+  upload       Upload                 @relation(fields: [uploadId], references: [id], onDelete: Restrict)
+
+  @@id([submissionId, uploadId])
+  @@index([uploadId])
+  @@map("verification_documents")
+}

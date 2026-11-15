@@ -1,0 +1,20 @@
+// Append-only signed entries. Inserting an entry atomically updates the wallet through a DB trigger.
+model PointsLedgerEntry {
+  id             String          @id @default(uuid()) @db.Uuid
+  profileId      String          @map("profile_id") @db.Uuid
+  kind           PointsEntryKind
+  amount         Decimal         @db.Decimal(18, 6)
+  depositId      String?         @unique @map("deposit_id") @db.Uuid
+  redemptionId   String?         @map("redemption_id") @db.Uuid
+  idempotencyKey String          @unique @map("idempotency_key")
+  reason         String?
+  createdAt      DateTime        @default(now()) @map("created_at") @db.Timestamptz(3)
+  wallet         PointsWallet    @relation(fields: [profileId], references: [profileId], onDelete: Restrict)
+  deposit        Deposit?        @relation(fields: [depositId, profileId], references: [id, profileId], onDelete: Restrict, onUpdate: Restrict)
+  redemption     Redemption?     @relation(fields: [redemptionId, profileId], references: [id, profileId], onDelete: Restrict, onUpdate: Restrict)
+
+  @@unique([redemptionId, kind])
+  @@unique([depositId, profileId])
+  @@index([profileId, createdAt])
+  @@map("points_ledger_entries")
+}

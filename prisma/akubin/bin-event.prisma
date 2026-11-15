@@ -1,0 +1,12 @@
+model BinEvent {
+  id        String   @id @default(uuid()) @db.Uuid
+  binId     String   @map("bin_id") @db.Uuid
+  actor     String
+  action    String
+  detail    Json?
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  bin       Bin      @relation(fields: [binId], references: [id], onDelete: Restrict)
+
+  @@index([binId, createdAt])
+  @@map("bin_events")
+}

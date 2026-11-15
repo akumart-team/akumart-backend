@@ -1,0 +1,7 @@
+enum MaterialCondition {
+  baled
+  loose
+  sorted
+  shredded
+  mixed
+}

@@ -1,0 +1,4 @@
+enum DepositStatus {
+  verified
+  rejected
+}

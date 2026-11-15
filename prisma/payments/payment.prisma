@@ -1,0 +1,25 @@
+// All money is in currency major units (NGN naira), never binary floats.
+model Payment {
+  id                String        @id @default(uuid()) @db.Uuid
+  orderId           String?       @map("order_id") @db.Uuid
+  campaignId        String?       @map("campaign_id") @db.Uuid
+  provider          String        @db.VarChar(50)
+  providerReference String?       @map("provider_reference")
+  idempotencyKey    String        @unique @map("idempotency_key")
+  amount            Decimal       @db.Decimal(20, 2)
+  currency          String        @default("NGN") @db.Char(3)
+  status            PaymentStatus @default(pending)
+  checkoutUrl       String?       @map("checkout_url")
+  paidAt            DateTime?     @map("paid_at") @db.Timestamptz(3)
+  failureReason     String?       @map("failure_reason")
+  createdAt         DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt         DateTime      @updatedAt @map("updated_at") @db.Timestamptz(3)
+  order             Order?        @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  campaign          Campaign?     @relation(fields: [campaignId], references: [id], onDelete: Restrict)
+  refunds           Refund[]
+
+  @@unique([provider, providerReference])
+  @@index([orderId, status])
+  @@index([campaignId, status])
+  @@map("payments")
+}

@@ -1,0 +1,11 @@
+model PointsWallet {
+  // Balance/version are database-maintained projections of ledger inserts; do not update directly.
+  profileId String              @id @map("profile_id") @db.Uuid
+  balance   Decimal             @default(0) @db.Decimal(18, 6)
+  version   Int                 @default(0)
+  updatedAt DateTime            @updatedAt @map("updated_at") @db.Timestamptz(3)
+  profile   Profile             @relation(fields: [profileId], references: [id], onDelete: Restrict)
+  entries   PointsLedgerEntry[]
+
+  @@map("points_wallets")
+}

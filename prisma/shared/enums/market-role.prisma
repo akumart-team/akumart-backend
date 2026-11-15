@@ -1,0 +1,6 @@
+enum MarketRole {
+  buyer
+  seller
+  both
+  none
+}

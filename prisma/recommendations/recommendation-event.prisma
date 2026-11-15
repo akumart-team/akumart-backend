@@ -1,0 +1,16 @@
+// Rankings can be computed from listings, preferences and activity; no fake AI scores are stored.
+model RecommendationEvent {
+  id               String                 @id @default(uuid()) @db.Uuid
+  profileId        String                 @map("profile_id") @db.Uuid
+  resourceType     RecommendationResource @map("resource_type")
+  // Polymorphic analytics reference; service validates target existence and visibility.
+  resourceId       String                 @map("resource_id") @db.Uuid
+  action           RecommendationAction
+  algorithmVersion String?                @map("algorithm_version")
+  createdAt        DateTime               @default(now()) @map("created_at") @db.Timestamptz(3)
+  profile          Profile                @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@index([profileId, createdAt])
+  @@index([resourceType, resourceId, action])
+  @@map("recommendation_events")
+}

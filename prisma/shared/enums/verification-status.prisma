@@ -1,0 +1,9 @@
+enum VerificationStatus {
+  collecting
+  checking
+  approved
+  pending_review
+  rejected
+  needs_resubmission
+  superseded
+}

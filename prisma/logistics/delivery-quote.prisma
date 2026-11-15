@@ -1,0 +1,21 @@
+model DeliveryQuote {
+  id         String              @id @default(uuid()) @db.Uuid
+  orderId    String              @map("order_id") @db.Uuid
+  partnerId  String              @map("partner_id") @db.Uuid
+  amount     Decimal             @db.Decimal(20, 2)
+  eta        String              @db.VarChar(100)
+  vehicle    String
+  status     QuoteStatus         @default(submitted)
+  kind       QuoteKind           @default(counter)
+  createdAt  DateTime            @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt  DateTime            @updatedAt @map("updated_at") @db.Timestamptz(3)
+  order      Order               @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  partner    Partner             @relation(fields: [partnerId], references: [id], onDelete: Restrict)
+  assignment DeliveryAssignment?
+
+  @@unique([orderId, partnerId])
+  // Composite key lets the assignment enforce that the selected quote belongs to this job/partner.
+  @@unique([id, orderId, partnerId])
+  @@index([partnerId, status])
+  @@map("delivery_quotes")
+}

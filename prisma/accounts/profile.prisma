@@ -1,0 +1,57 @@
+// Identity is owned by Supabase auth.users. Keep its UUID as the profile ID.
+model Profile {
+  id               String    @id @db.Uuid
+  email            String    @unique
+  firstName        String    @default("") @map("first_name")
+  lastName         String    @default("") @map("last_name")
+  displayName      String?   @map("display_name") @db.VarChar(100)
+  phone            String?   @db.VarChar(25)
+  city             String?   @db.VarChar(100)
+  companyName      String?   @map("company_name")
+  businessType     String?   @map("business_type")
+  location         String?
+  // Compatibility fields for current auth service; consent history is canonical for new flows.
+  termsAcceptedAt  DateTime? @map("terms_accepted_at")
+  termsVersion     String?   @map("terms_version")
+  profileCompleted Boolean   @default(false) @map("profile_completed")
+  onboardedAt      DateTime? @map("onboarded_at") @db.Timestamptz(3)
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
+
+  preferences          UserPreferences?
+  security             UserSecurity?
+  consents             ConsentRecord[]
+  staff                StaffMembership?
+  uploads              Upload[]
+  verifications        VerificationSubmission[] @relation("VerificationApplicant")
+  verificationReviews  VerificationSubmission[] @relation("VerificationReviewer")
+  listings             Listing[]
+  savedListings        SavedListing[]
+  listingReports       ListingReport[]
+  offers               Offer[]
+  offerSteps           OfferStep[]
+  requests             BuyerRequest[]
+  requestResponses     BuyerRequestResponse[]
+  purchases            Order[]                  @relation("OrderBuyer")
+  sales                Order[]                  @relation("OrderSeller")
+  reviews              OrderReview[]
+  disputes             Dispute[]                @relation("DisputeOpener")
+  disputeDecisions     Dispute[]                @relation("DisputeResolver")
+  partner              Partner?
+  binSessions          BinSession[]
+  deposits             Deposit[]
+  wallet               PointsWallet?
+  payoutRecipient      PayoutRecipient?
+  redemptions          Redemption[]
+  campaigns            Campaign[]
+  articles             Article[]
+  savedArticles        SavedArticle[]
+  tickets              SupportTicket[]          @relation("TicketRequester")
+  assignedTickets      SupportTicket[]          @relation("TicketAssignee")
+  notifications        Notification[]
+  conversations        AssistantConversation[]
+  recommendationEvents RecommendationEvent[]
+
+  @@index([city])
+  @@map("profiles")
+}

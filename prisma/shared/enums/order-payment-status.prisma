@@ -1,0 +1,8 @@
+enum OrderPaymentStatus {
+  unpaid
+  failed
+  held
+  released
+  refunded
+  partially_refunded
+}

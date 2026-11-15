@@ -1,0 +1,7 @@
+model MaterialPointRate {
+  material    Material @id
+  pointsPerKg Decimal  @map("points_per_kg") @db.Decimal(18, 6)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  @@map("material_point_rates")
+}

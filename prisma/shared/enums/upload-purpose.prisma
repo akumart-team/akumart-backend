@@ -1,0 +1,9 @@
+enum UploadPurpose {
+  listing_image
+  verification_document
+  partner_document
+  delivery_proof
+  dispute_evidence
+  campaign_creative
+  article_image
+}

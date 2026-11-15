@@ -1,0 +1,11 @@
+model PayoutRecipient {
+  profileId String @id @map("profile_id") @db.Uuid
+  recipientCode String @unique @map("recipient_code")
+  accountName String @map("account_name")
+  accountLast4 String @map("account_last4") @db.Char(4)
+  bankCode String @map("bank_code") @db.VarChar(20)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Restrict)
+  @@map("payout_recipients")
+}

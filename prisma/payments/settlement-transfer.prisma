@@ -1,0 +1,20 @@
+model SettlementTransfer {
+  id                 String                @id @default(uuid()) @db.Uuid
+  settlementId       String                @map("settlement_id") @db.Uuid
+  beneficiary        SettlementBeneficiary
+  provider           String                @db.VarChar(50)
+  recipientReference String                @map("recipient_reference")
+  providerReference  String?               @map("provider_reference")
+  idempotencyKey     String                @unique @map("idempotency_key")
+  amount             Decimal               @db.Decimal(20, 2)
+  status             TransferStatus        @default(pending)
+  failureReason      String?               @map("failure_reason")
+  completedAt        DateTime?             @map("completed_at") @db.Timestamptz(3)
+  createdAt          DateTime              @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt          DateTime              @updatedAt @map("updated_at") @db.Timestamptz(3)
+  settlement         Settlement            @relation(fields: [settlementId], references: [id], onDelete: Restrict)
+
+  @@unique([settlementId, beneficiary])
+  @@unique([provider, providerReference])
+  @@map("settlement_transfers")
+}

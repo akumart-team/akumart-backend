@@ -1,0 +1,21 @@
+model BuyerRequest {
+  id           String                 @id @default(uuid()) @db.Uuid
+  buyerId      String                 @map("buyer_id") @db.Uuid
+  material     Material
+  title        String                 @db.VarChar(200)
+  quantity     Decimal                @db.Decimal(18, 3)
+  unit         QuantityUnit
+  maxUnitPrice Decimal                @map("max_unit_price") @db.Decimal(20, 2)
+  currency     String                 @default("NGN") @db.Char(3)
+  city         String                 @db.VarChar(100)
+  needBy       DateTime               @map("need_by") @db.Date
+  status       BuyerRequestStatus     @default(open)
+  createdAt    DateTime               @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt    DateTime               @updatedAt @map("updated_at") @db.Timestamptz(3)
+  buyer        Profile                @relation(fields: [buyerId], references: [id], onDelete: Restrict)
+  responses    BuyerRequestResponse[]
+
+  @@index([status, material, city, createdAt])
+  @@index([buyerId])
+  @@map("buyer_requests")
+}

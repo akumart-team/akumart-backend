@@ -1,0 +1,29 @@
+model Bin {
+  id               String                 @id @default(uuid()) @db.Uuid
+  code             String                 @unique @db.VarChar(40)
+  name             String
+  city             String
+  area             String
+  landmark         String?
+  latitude         Decimal                @db.Decimal(9, 6)
+  longitude        Decimal                @db.Decimal(9, 6)
+  materials        Material[]
+  status           BinStatus              @default(offline)
+  capacityPct      Decimal                @default(0) @map("capacity_pct") @db.Decimal(5, 2)
+  hours            String
+  collector        String?
+  nextCollectionAt DateTime?              @map("next_collection_at") @db.Timestamptz(3)
+  lastSeenAt       DateTime?              @map("last_seen_at") @db.Timestamptz(3)
+  createdAt        DateTime               @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt        DateTime               @updatedAt @map("updated_at") @db.Timestamptz(3)
+  devices          BinDevice[]
+  sessions         BinSession[]
+  deposits         Deposit[]
+  events           BinEvent[]
+  collections      BinCollection[]
+  maintenance      BinMaintenanceTicket[]
+  telemetry        BinTelemetry[]
+
+  @@index([city, status])
+  @@map("bins")
+}

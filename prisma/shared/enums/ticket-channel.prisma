@@ -1,0 +1,6 @@
+enum TicketChannel {
+  ai_chat
+  contact
+  report
+  dispute
+}

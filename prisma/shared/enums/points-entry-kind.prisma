@@ -1,0 +1,6 @@
+enum PointsEntryKind {
+  deposit_credit
+  redemption_debit
+  redemption_refund
+  adjustment
+}

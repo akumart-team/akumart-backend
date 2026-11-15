@@ -1,0 +1,6 @@
+enum PartnerStatus {
+  pending
+  approved
+  rejected
+  suspended
+}

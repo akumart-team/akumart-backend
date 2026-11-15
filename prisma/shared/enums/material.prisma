@@ -1,0 +1,10 @@
+enum Material {
+  plastic
+  metal
+  glass
+  cardboard
+  paper
+  wood
+  textiles
+  rubber
+}

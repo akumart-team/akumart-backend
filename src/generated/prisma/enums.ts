@@ -9,7 +9,478 @@
 * 🟢 You can import this file directly.
 */
 
+export const ArticleStatus = {
+  draft: 'draft',
+  published: 'published',
+  unpublished: 'unpublished'
+} as const
+
+export type ArticleStatus = (typeof ArticleStatus)[keyof typeof ArticleStatus]
 
 
-// This file is empty because there are no enums in the schema.
-export {}
+export const AssistantRole = {
+  user: 'user',
+  assistant: 'assistant'
+} as const
+
+export type AssistantRole = (typeof AssistantRole)[keyof typeof AssistantRole]
+
+
+export const BinSessionStatus = {
+  active: 'active',
+  ended: 'ended',
+  expired: 'expired',
+  revoked: 'revoked'
+} as const
+
+export type BinSessionStatus = (typeof BinSessionStatus)[keyof typeof BinSessionStatus]
+
+
+export const BinStatus = {
+  online: 'online',
+  offline: 'offline',
+  full: 'full',
+  maintenance: 'maintenance'
+} as const
+
+export type BinStatus = (typeof BinStatus)[keyof typeof BinStatus]
+
+
+export const BuyerRequestStatus = {
+  open: 'open',
+  closed: 'closed',
+  expired: 'expired'
+} as const
+
+export type BuyerRequestStatus = (typeof BuyerRequestStatus)[keyof typeof BuyerRequestStatus]
+
+
+export const CampaignEventKind = {
+  impression: 'impression',
+  click: 'click'
+} as const
+
+export type CampaignEventKind = (typeof CampaignEventKind)[keyof typeof CampaignEventKind]
+
+
+export const CampaignStatus = {
+  draft: 'draft',
+  pending_review: 'pending_review',
+  approved: 'approved',
+  rejected: 'rejected',
+  paused: 'paused',
+  expired: 'expired'
+} as const
+
+export type CampaignStatus = (typeof CampaignStatus)[keyof typeof CampaignStatus]
+
+
+export const ConsentDocument = {
+  terms: 'terms',
+  privacy: 'privacy'
+} as const
+
+export type ConsentDocument = (typeof ConsentDocument)[keyof typeof ConsentDocument]
+
+
+export const DepositMeasure = {
+  weight: 'weight',
+  count: 'count'
+} as const
+
+export type DepositMeasure = (typeof DepositMeasure)[keyof typeof DepositMeasure]
+
+
+export const DepositStatus = {
+  verified: 'verified',
+  rejected: 'rejected'
+} as const
+
+export type DepositStatus = (typeof DepositStatus)[keyof typeof DepositStatus]
+
+
+export const DeviceAuthMode = {
+  authenticated: 'authenticated',
+  legacy_bin_id: 'legacy_bin_id'
+} as const
+
+export type DeviceAuthMode = (typeof DeviceAuthMode)[keyof typeof DeviceAuthMode]
+
+
+export const DisputeDecision = {
+  refund: 'refund',
+  partial: 'partial',
+  release: 'release'
+} as const
+
+export type DisputeDecision = (typeof DisputeDecision)[keyof typeof DisputeDecision]
+
+
+export const DisputeStatus = {
+  open: 'open',
+  under_review: 'under_review',
+  resolved: 'resolved'
+} as const
+
+export type DisputeStatus = (typeof DisputeStatus)[keyof typeof DisputeStatus]
+
+
+export const EnquiryKind = {
+  general: 'general',
+  support: 'support',
+  business: 'business',
+  logistics: 'logistics'
+} as const
+
+export type EnquiryKind = (typeof EnquiryKind)[keyof typeof EnquiryKind]
+
+
+export const ListingStatus = {
+  draft: 'draft',
+  published: 'published',
+  flagged: 'flagged',
+  sold: 'sold',
+  paused: 'paused'
+} as const
+
+export type ListingStatus = (typeof ListingStatus)[keyof typeof ListingStatus]
+
+
+export const MaintenanceStatus = {
+  open: 'open',
+  resolved: 'resolved'
+} as const
+
+export type MaintenanceStatus = (typeof MaintenanceStatus)[keyof typeof MaintenanceStatus]
+
+
+export const MarketMode = {
+  buyer: 'buyer',
+  seller: 'seller'
+} as const
+
+export type MarketMode = (typeof MarketMode)[keyof typeof MarketMode]
+
+
+export const MarketRole = {
+  buyer: 'buyer',
+  seller: 'seller',
+  both: 'both',
+  none: 'none'
+} as const
+
+export type MarketRole = (typeof MarketRole)[keyof typeof MarketRole]
+
+
+export const MaterialCondition = {
+  baled: 'baled',
+  loose: 'loose',
+  sorted: 'sorted',
+  shredded: 'shredded',
+  mixed: 'mixed'
+} as const
+
+export type MaterialCondition = (typeof MaterialCondition)[keyof typeof MaterialCondition]
+
+
+export const Material = {
+  plastic: 'plastic',
+  metal: 'metal',
+  glass: 'glass',
+  cardboard: 'cardboard',
+  paper: 'paper',
+  wood: 'wood',
+  textiles: 'textiles',
+  rubber: 'rubber'
+} as const
+
+export type Material = (typeof Material)[keyof typeof Material]
+
+
+export const NewsStatus = {
+  proposed: 'proposed',
+  approved: 'approved',
+  rejected: 'rejected'
+} as const
+
+export type NewsStatus = (typeof NewsStatus)[keyof typeof NewsStatus]
+
+
+export const OfferAction = {
+  offer: 'offer',
+  counter: 'counter',
+  accept: 'accept',
+  reject: 'reject',
+  expire: 'expire'
+} as const
+
+export type OfferAction = (typeof OfferAction)[keyof typeof OfferAction]
+
+
+export const OfferStatus = {
+  awaiting_seller: 'awaiting_seller',
+  awaiting_buyer: 'awaiting_buyer',
+  accepted: 'accepted',
+  rejected: 'rejected',
+  expired: 'expired'
+} as const
+
+export type OfferStatus = (typeof OfferStatus)[keyof typeof OfferStatus]
+
+
+export const OrderPaymentStatus = {
+  unpaid: 'unpaid',
+  failed: 'failed',
+  held: 'held',
+  released: 'released',
+  refunded: 'refunded',
+  partially_refunded: 'partially_refunded'
+} as const
+
+export type OrderPaymentStatus = (typeof OrderPaymentStatus)[keyof typeof OrderPaymentStatus]
+
+
+export const OrderStatus = {
+  choose_fulfilment: 'choose_fulfilment',
+  awaiting_quotes: 'awaiting_quotes',
+  no_quotes: 'no_quotes',
+  awaiting_payment: 'awaiting_payment',
+  paid: 'paid',
+  picked_up: 'picked_up',
+  in_transit: 'in_transit',
+  delivered: 'delivered',
+  proof_uploaded: 'proof_uploaded',
+  confirmed: 'confirmed',
+  settled: 'settled',
+  disputed: 'disputed',
+  refunded: 'refunded',
+  cancelled: 'cancelled'
+} as const
+
+export type OrderStatus = (typeof OrderStatus)[keyof typeof OrderStatus]
+
+
+export const PartnerStatus = {
+  pending: 'pending',
+  approved: 'approved',
+  rejected: 'rejected',
+  suspended: 'suspended'
+} as const
+
+export type PartnerStatus = (typeof PartnerStatus)[keyof typeof PartnerStatus]
+
+
+export const PaymentStatus = {
+  pending: 'pending',
+  succeeded: 'succeeded',
+  failed: 'failed',
+  expired: 'expired'
+} as const
+
+export type PaymentStatus = (typeof PaymentStatus)[keyof typeof PaymentStatus]
+
+
+export const PointsEntryKind = {
+  deposit_credit: 'deposit_credit',
+  redemption_debit: 'redemption_debit',
+  redemption_refund: 'redemption_refund',
+  adjustment: 'adjustment'
+} as const
+
+export type PointsEntryKind = (typeof PointsEntryKind)[keyof typeof PointsEntryKind]
+
+
+export const QuantityUnit = {
+  kg: 'kg',
+  tonne: 'tonne'
+} as const
+
+export type QuantityUnit = (typeof QuantityUnit)[keyof typeof QuantityUnit]
+
+
+export const QuoteKind = {
+  accept: 'accept',
+  counter: 'counter'
+} as const
+
+export type QuoteKind = (typeof QuoteKind)[keyof typeof QuoteKind]
+
+
+export const QuoteStatus = {
+  submitted: 'submitted',
+  selected: 'selected',
+  declined: 'declined',
+  expired: 'expired'
+} as const
+
+export type QuoteStatus = (typeof QuoteStatus)[keyof typeof QuoteStatus]
+
+
+export const RecommendationAction = {
+  impression: 'impression',
+  view: 'view',
+  save: 'save',
+  dismiss: 'dismiss',
+  contact: 'contact'
+} as const
+
+export type RecommendationAction = (typeof RecommendationAction)[keyof typeof RecommendationAction]
+
+
+export const RecommendationResource = {
+  listing: 'listing',
+  article: 'article',
+  job: 'job'
+} as const
+
+export type RecommendationResource = (typeof RecommendationResource)[keyof typeof RecommendationResource]
+
+
+export const RedemptionStatus = {
+  pending_review: 'pending_review',
+  approved: 'approved',
+  processing: 'processing',
+  completed: 'completed',
+  rejected: 'rejected',
+  failed: 'failed'
+} as const
+
+export type RedemptionStatus = (typeof RedemptionStatus)[keyof typeof RedemptionStatus]
+
+
+export const RequestResponseStatus = {
+  sent: 'sent',
+  shortlisted: 'shortlisted',
+  declined: 'declined'
+} as const
+
+export type RequestResponseStatus = (typeof RequestResponseStatus)[keyof typeof RequestResponseStatus]
+
+
+export const RewardKind = {
+  airtime: 'airtime',
+  cash: 'cash',
+  physical: 'physical'
+} as const
+
+export type RewardKind = (typeof RewardKind)[keyof typeof RewardKind]
+
+
+export const SettlementBeneficiary = {
+  seller: 'seller',
+  partner: 'partner'
+} as const
+
+export type SettlementBeneficiary = (typeof SettlementBeneficiary)[keyof typeof SettlementBeneficiary]
+
+
+export const StaffRole = {
+  super: 'super',
+  operations: 'operations',
+  support: 'support',
+  finance: 'finance',
+  content: 'content'
+} as const
+
+export type StaffRole = (typeof StaffRole)[keyof typeof StaffRole]
+
+
+export const TicketChannel = {
+  ai_chat: 'ai_chat',
+  contact: 'contact',
+  report: 'report',
+  dispute: 'dispute'
+} as const
+
+export type TicketChannel = (typeof TicketChannel)[keyof typeof TicketChannel]
+
+
+export const TicketPriority = {
+  low: 'low',
+  normal: 'normal',
+  high: 'high',
+  urgent: 'urgent'
+} as const
+
+export type TicketPriority = (typeof TicketPriority)[keyof typeof TicketPriority]
+
+
+export const TicketStatus = {
+  open: 'open',
+  assigned: 'assigned',
+  resolved: 'resolved'
+} as const
+
+export type TicketStatus = (typeof TicketStatus)[keyof typeof TicketStatus]
+
+
+export const TransferStatus = {
+  pending: 'pending',
+  processing: 'processing',
+  completed: 'completed',
+  failed: 'failed'
+} as const
+
+export type TransferStatus = (typeof TransferStatus)[keyof typeof TransferStatus]
+
+
+export const UploadPurpose = {
+  listing_image: 'listing_image',
+  verification_document: 'verification_document',
+  partner_document: 'partner_document',
+  delivery_proof: 'delivery_proof',
+  dispute_evidence: 'dispute_evidence',
+  campaign_creative: 'campaign_creative',
+  article_image: 'article_image'
+} as const
+
+export type UploadPurpose = (typeof UploadPurpose)[keyof typeof UploadPurpose]
+
+
+export const UploadStatus = {
+  pending: 'pending',
+  ready: 'ready',
+  rejected: 'rejected',
+  deleted: 'deleted'
+} as const
+
+export type UploadStatus = (typeof UploadStatus)[keyof typeof UploadStatus]
+
+
+export const VerificationLevel = {
+  basic: 'basic',
+  full: 'full'
+} as const
+
+export type VerificationLevel = (typeof VerificationLevel)[keyof typeof VerificationLevel]
+
+
+export const VerificationStatus = {
+  collecting: 'collecting',
+  checking: 'checking',
+  approved: 'approved',
+  pending_review: 'pending_review',
+  rejected: 'rejected',
+  needs_resubmission: 'needs_resubmission',
+  superseded: 'superseded'
+} as const
+
+export type VerificationStatus = (typeof VerificationStatus)[keyof typeof VerificationStatus]
+
+
+export const VerificationType = {
+  individual: 'individual',
+  business: 'business'
+} as const
+
+export type VerificationType = (typeof VerificationType)[keyof typeof VerificationType]
+
+
+export const WebhookStatus = {
+  pending: 'pending',
+  processing: 'processing',
+  processed: 'processed',
+  failed: 'failed'
+} as const
+
+export type WebhookStatus = (typeof WebhookStatus)[keyof typeof WebhookStatus]

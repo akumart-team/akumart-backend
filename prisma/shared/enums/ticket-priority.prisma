@@ -1,0 +1,6 @@
+enum TicketPriority {
+  low
+  normal
+  high
+  urgent
+}

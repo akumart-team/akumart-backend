@@ -1,0 +1,52 @@
+model Order {
+  id              String              @id @default(uuid()) @db.Uuid
+  offerId         String              @unique @map("offer_id") @db.Uuid
+  listingId       String              @map("listing_id") @db.Uuid
+  buyerId         String              @map("buyer_id") @db.Uuid
+  sellerId        String              @map("seller_id") @db.Uuid
+  // Immutable commercial snapshots; later listing/settings changes must not alter the deal.
+  title           String
+  material        Material
+  quantity        Decimal             @db.Decimal(18, 3)
+  unit            QuantityUnit
+  unitPrice       Decimal             @map("unit_price") @db.Decimal(20, 2)
+  currency        String              @default("NGN") @db.Char(3)
+  sellerFeePct    Decimal             @map("seller_fee_pct") @db.Decimal(5, 2)
+  partnerFeePct   Decimal             @map("partner_fee_pct") @db.Decimal(5, 2)
+  inspectionHours Int                 @map("inspection_hours")
+  pickupCity      String              @map("pickup_city")
+  pickupArea      String              @map("pickup_area")
+  destination     String?
+  recommendedFare Decimal?            @map("recommended_fare") @db.Decimal(20, 2)
+  proposedFare    Decimal?            @map("proposed_fare") @db.Decimal(20, 2)
+  quoteDeadline   DateTime?           @map("quote_deadline") @db.Timestamptz(3)
+  inspectionDue   DateTime?           @map("inspection_due") @db.Timestamptz(3)
+  status          OrderStatus         @default(choose_fulfilment)
+  paymentStatus   OrderPaymentStatus  @default(unpaid) @map("payment_status")
+  version         Int                 @default(0)
+  createdAt       DateTime            @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt       DateTime            @updatedAt @map("updated_at") @db.Timestamptz(3)
+  offer           Offer               @relation(fields: [offerId, listingId, buyerId, sellerId], references: [id, listingId, buyerId, sellerId], onDelete: Restrict, onUpdate: Restrict)
+  listing         Listing             @relation(fields: [listingId, sellerId], references: [id, sellerId], onDelete: Restrict, onUpdate: Restrict)
+  buyer           Profile             @relation("OrderBuyer", fields: [buyerId], references: [id], onDelete: Restrict)
+  seller          Profile             @relation("OrderSeller", fields: [sellerId], references: [id], onDelete: Restrict)
+  notices         JobNotice[]
+  quotes          DeliveryQuote[]
+  assignment      DeliveryAssignment?
+  events          OrderEvent[]
+  proofs          DeliveryProof[]
+  review          OrderReview?
+  dispute         Dispute?
+  payments        Payment[]
+  holds           SettlementHold[]
+  settlement      Settlement?
+
+  @@unique([offerId, listingId, buyerId, sellerId])
+  @@unique([id, buyerId])
+  @@index([buyerId, createdAt])
+  @@index([sellerId, createdAt])
+  @@index([listingId])
+  @@index([status, quoteDeadline])
+  @@index([status, inspectionDue])
+  @@map("orders")
+}

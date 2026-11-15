@@ -1,0 +1,4 @@
+enum DeviceAuthMode {
+  authenticated
+  legacy_bin_id
+}

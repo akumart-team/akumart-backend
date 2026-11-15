@@ -1,0 +1,34 @@
+model Campaign {
+  id             String             @id @default(uuid()) @db.Uuid
+  ownerId        String             @map("owner_id") @db.Uuid
+  packageId      String             @map("package_id") @db.VarChar(40)
+  title          String
+  body           String
+  destinationUrl String             @map("destination_url")
+  imageId        String             @map("image_id") @db.Uuid
+  locations      String[]           @default([])
+  materials      Material[]         @default([])
+  roles          MarketRole[]       @default([])
+  price          Decimal            @db.Decimal(20, 2)
+  currency       String             @default("NGN") @db.Char(3)
+  durationDays   Int                @map("duration_days")
+  status         CampaignStatus     @default(draft)
+  reason         String?
+  reviewedById   String?            @map("reviewed_by_id") @db.Uuid
+  reviewedAt     DateTime?          @map("reviewed_at") @db.Timestamptz(3)
+  startsAt       DateTime?          @map("starts_at") @db.Timestamptz(3)
+  endsAt         DateTime?          @map("ends_at") @db.Timestamptz(3)
+  createdAt      DateTime           @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt      DateTime           @updatedAt @map("updated_at") @db.Timestamptz(3)
+  owner          Profile            @relation(fields: [ownerId], references: [id], onDelete: Restrict)
+  package        AdvertisingPackage @relation(fields: [packageId], references: [id], onDelete: Restrict)
+  image          Upload             @relation(fields: [imageId], references: [id], onDelete: Restrict)
+  payments       Payment[]
+  events         CampaignEvent[]
+
+  @@index([ownerId, createdAt])
+  @@index([status, startsAt, endsAt])
+  @@index([packageId])
+  @@index([imageId])
+  @@map("campaigns")
+}

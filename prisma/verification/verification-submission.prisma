@@ -1,0 +1,26 @@
+model VerificationSubmission {
+  id                String                 @id @default(uuid()) @db.Uuid
+  profileId         String                 @map("profile_id") @db.Uuid
+  level             VerificationLevel
+  type              VerificationType
+  status            VerificationStatus     @default(pending_review)
+  // Provider-specific form fields; sensitive values must be minimized/encrypted by the service.
+  data              Json                   @default("{}")
+  provider          String?
+  providerReference String?                @map("provider_reference")
+  expiresAt         DateTime?              @map("expires_at") @db.Timestamptz(3)
+  reason            String?
+  reviewedById      String?                @map("reviewed_by_id") @db.Uuid
+  reviewedAt        DateTime?              @map("reviewed_at") @db.Timestamptz(3)
+  createdAt         DateTime               @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt         DateTime               @updatedAt @map("updated_at") @db.Timestamptz(3)
+  profile           Profile                @relation("VerificationApplicant", fields: [profileId], references: [id], onDelete: Restrict)
+  reviewer          Profile?               @relation("VerificationReviewer", fields: [reviewedById], references: [id], onDelete: Restrict)
+  documents         VerificationDocument[]
+  events            VerificationEvent[]
+
+  @@unique([provider, providerReference])
+  @@index([profileId, level, createdAt])
+  @@index([status, createdAt])
+  @@map("verification_submissions")
+}

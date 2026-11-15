@@ -1,0 +1,25 @@
+model SupportTicket {
+  id          String         @id @default(uuid()) @db.Uuid
+  requesterId String?        @map("requester_id") @db.Uuid
+  assigneeId  String?        @map("assignee_id") @db.Uuid
+  disputeId   String?        @map("dispute_id") @db.Uuid
+  name        String
+  email       String
+  subject     String
+  message     String
+  channel     TicketChannel
+  priority    TicketPriority @default(normal)
+  status      TicketStatus   @default(open)
+  resolvedAt  DateTime?      @map("resolved_at") @db.Timestamptz(3)
+  createdAt   DateTime       @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt   DateTime       @updatedAt @map("updated_at") @db.Timestamptz(3)
+  requester   Profile?       @relation("TicketRequester", fields: [requesterId], references: [id], onDelete: Restrict)
+  assignee    Profile?       @relation("TicketAssignee", fields: [assigneeId], references: [id], onDelete: Restrict)
+  dispute     Dispute?       @relation(fields: [disputeId], references: [id], onDelete: Restrict)
+
+  @@index([requesterId, createdAt])
+  @@index([assigneeId, status])
+  @@index([status, priority, createdAt])
+  @@index([disputeId])
+  @@map("support_tickets")
+}
