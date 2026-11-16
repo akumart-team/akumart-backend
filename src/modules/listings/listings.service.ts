@@ -132,6 +132,7 @@ export class ListingsService {
       throw new BadRequestException('Null values are not supported.');
     return {
       data: await this.db.transaction(async (tx) => {
+        await this.policy.requireMode(user, 'seller', tx);
         await this.policy.require(user, 'basic', tx);
         if (id)
           await tx.$queryRaw`SELECT id FROM listings WHERE id = ${id}::uuid FOR UPDATE`;

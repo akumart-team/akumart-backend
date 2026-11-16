@@ -398,6 +398,7 @@ test(
     await t.test(
       'listings, attachment ownership, negotiation and atomic stock reservation',
       async () => {
+        await prisma.userPreferences.update({where:{profileId:identities.seller},data:{marketRole:'seller',activeMode:'seller'}});
         const imageId = await upload('seller', 'listing_image');
         const row = await invoke('post', '/listings', 'seller', {
           title: 'Sorted bottles',
@@ -416,6 +417,12 @@ test(
           imageIds: [imageId],
         });
         listingId = row.data.id;
+        const blocked = await invoke('post', '/listings', 'buyer', {...row.data,imageIds:[imageId]},403);
+        assert.match(blocked.message,/seller/);
+        await prisma.userPreferences.update({where:{profileId:identities.seller},data:{marketRole:'both',activeMode:'buyer'}});
+        await invoke('patch', `/listings/${listingId}`, 'seller', {title:'Wrong mode'},403);
+        await prisma.userPreferences.update({where:{profileId:identities.seller},data:{marketRole:'seller',activeMode:'seller'}});
+
         const browse = await invoke('get', '/listings?material=plastic', null);
         assert.equal(browse.data.length, 1);
         await invoke('get', `/uploads/${imageId}/access`, null);
@@ -424,7 +431,7 @@ test(
           `/listings/${listingId}`,
           'buyer',
           { title: 'Hijack' },
-          404,
+          403,
         );
         await invoke('put', `/users/me/saved-listings/${listingId}`, 'buyer');
         // Bookmarks are a buyer workflow and never permit saving your own listing.

@@ -62,6 +62,7 @@ export class BuyerRequestsService {
       throw new BadRequestException(
         'Positive quantities/prices and a current/future need-by date are required.',
       );
+    await this.policy.requireMode(user, 'buyer');
     await this.policy.require(user, 'basic');
     return {
       data: await this.db.prisma.buyerRequest.create({
