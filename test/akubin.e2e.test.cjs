@@ -1,6 +1,7 @@
 // End-to-end HTTP -> Nest -> Prisma -> disposable PostgreSQL. No .env or remote services.
 require('reflect-metadata');
 const assert = require('node:assert/strict');
+const build = process.env.AKUMART_TEST_BUILD || '../dist';
 const { test } = require('node:test');
 const { randomUUID } = require('node:crypto');
 const { readdir, readFile } = require('node:fs/promises');
@@ -9,7 +10,7 @@ const request = require('supertest');
 const { PGlite } = require('@electric-sql/pglite');
 const { PGLiteSocketServer } = require('@electric-sql/pglite-socket');
 const { PrismaPg } = require('@prisma/adapter-pg');
-const { PrismaClient } = require('../dist/generated/prisma/client');
+const { PrismaClient } = require(build + '/generated/prisma/client');
 const {
   Global,
   Module,
@@ -19,16 +20,16 @@ const {
 const { Test } = require('@nestjs/testing');
 const { ConfigModule, ConfigService } = require('@nestjs/config');
 const { SwaggerModule, DocumentBuilder } = require('@nestjs/swagger');
-const { AkubinModule } = require('../dist/modules/akubin/akubin.module');
+const { AkubinModule } = require(build + '/modules/akubin/akubin.module');
 const {
   AkubinDatabase,
-} = require('../dist/modules/akubin/services/akubin-database.service');
+} = require(build + '/modules/akubin/services/akubin-database.service');
 const {
   PrismaService,
-} = require('../dist/integrations/database/prisma.service');
+} = require(build + '/integrations/database/prisma.service');
 const {
   SupabaseService,
-} = require('../dist/integrations/supabase/supabase.service');
+} = require(build + '/integrations/supabase/supabase.service');
 
 test(
   'AkuBin firmware, account and staff endpoints',

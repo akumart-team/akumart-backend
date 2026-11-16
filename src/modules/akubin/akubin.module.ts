@@ -1,4 +1,5 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, type NestModule } from '@nestjs/common';
+import { AkubinHttpLoggingMiddleware } from './middleware/akubin-http-logging.middleware';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { SupabaseService } from '../../integrations/supabase/supabase.service';
 import { SupabaseAuthGuard } from '../../common/guard/supabase-auth.guard';
@@ -38,4 +39,15 @@ import { AkubinAdminService } from './services/akubin-admin.service';
     AkubinAdminService,
   ],
 })
-export class AkubinModule {}
+export class AkubinModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(AkubinHttpLoggingMiddleware)
+      .forRoutes(
+        AkubinController,
+        AkubinAccountController,
+        AkubinAdminController,
+        AkubinTelemetryController,
+      );
+  }
+}
