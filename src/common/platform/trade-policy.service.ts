@@ -3,6 +3,25 @@ import { DatabaseService, type Tx } from './database.service';
 @Injectable()
 export class TradePolicy {
   constructor(private readonly db: DatabaseService) {}
+  async requireMode(
+    profileId: string,
+    mode: 'buyer' | 'seller',
+    tx: Tx = this.db.prisma,
+  ) {
+    const preferences = await tx.userPreferences.findUnique({
+      where: { profileId },
+    });
+    const actual =
+      preferences?.marketRole === 'both'
+        ? preferences.activeMode === 'seller'
+          ? 'seller'
+          : 'buyer'
+        : preferences?.marketRole;
+    if (actual !== mode)
+      throw new ForbiddenException(
+        `Switch to a ${mode} account or ${mode} mode to perform this action.`,
+      );
+  }
   async require(
     profileId: string,
     level: 'basic' | 'full',
