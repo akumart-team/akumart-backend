@@ -1,3 +1,4 @@
+import { pointsValueNaira } from './points-value';
 import {
   Injectable,
   NotFoundException,
@@ -73,21 +74,32 @@ export class AkubinReadService {
   }
 
   async wallet(profileId: string) {
-    const wallet = await this.db.prisma.pointsWallet.findUnique({
-      where: { profileId },
-      select: { balance: true, updatedAt: true },
-    });
+    const [wallet, settings] = await this.db.prisma.$transaction([
+      this.db.prisma.pointsWallet.findUnique({
+        where: { profileId },
+        select: { balance: true, updatedAt: true },
+      }),
+      this.db.prisma.platformSettings.findUnique({
+        where: { id: 1 },
+        select: { pointValueNaira: true },
+      }),
+    ]);
     if (!wallet) throw new NotFoundException('Points wallet not found.');
     return {
       data: {
         balancePoints: wallet.balance.toString(),
+        balanceValueNaira: pointsValueNaira(
+          wallet.balance,
+          settings?.pointValueNaira,
+        ),
+        pointValueNaira: settings?.pointValueNaira.toString() ?? null,
         updatedAt: wallet.updatedAt,
       },
     };
   }
 
   async summary(profileId: string) {
-    const [wallet, totals, depositCount, redemptions] =
+    const [wallet, totals, depositCount, redemptions, settings] =
       await this.db.prisma.$transaction([
         this.db.prisma.pointsWallet.findUnique({ where: { profileId } }),
         this.db.prisma.deposit.aggregate({
@@ -97,12 +109,25 @@ export class AkubinReadService {
         }),
         this.db.prisma.deposit.count({ where: { profileId } }),
         this.db.prisma.redemption.count({ where: { profileId } }),
+        this.db.prisma.platformSettings.findUnique({
+          where: { id: 1 },
+          select: { pointValueNaira: true },
+        }),
       ]);
     if (!wallet) throw new NotFoundException('Points wallet not found.');
     return {
       data: {
         balancePoints: wallet.balance.toString(),
+        balanceValueNaira: pointsValueNaira(
+          wallet.balance,
+          settings?.pointValueNaira,
+        ),
+        pointValueNaira: settings?.pointValueNaira.toString() ?? null,
         lifetimeEarnedPoints: totals._sum.awardedPoints?.toString() ?? '0',
+        lifetimeEarnedValueNaira: pointsValueNaira(
+          totals._sum.awardedPoints ?? new Prisma.Decimal(0),
+          settings?.pointValueNaira,
+        ),
         weightKg: totals._sum.weightKg?.toString() ?? '0',
         depositCount,
         verifiedDepositCount: totals._count,
