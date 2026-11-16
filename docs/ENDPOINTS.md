@@ -183,3 +183,5 @@ Generated with `npm run api:export`. Request schemas are in [openapi.json](opena
 | Verification | POST | `/api/v1/users/me/verification/submissions` | Bearer | SubmitVerificationDto |
 
 Total: 177 operations.
+
+Assistant history retrieval is retired (410 Gone). `POST /api/v1/assistant/messages` is stateless; see [FRONTEND_API.md](FRONTEND_API.md#recommendations-and-assistant).

@@ -5,13 +5,14 @@ const path = require('node:path');
 const { Test } = require('@nestjs/testing');
 const { VersioningType } = require('@nestjs/common');
 const { DocumentBuilder, SwaggerModule } = require('@nestjs/swagger');
-const { AppModule } = require('../dist/app.module');
+const build = process.env.AKUMART_TEST_BUILD || '../dist';
+const { AppModule } = require(build + '/app.module');
 const {
   PrismaService,
-} = require('../dist/integrations/database/prisma.service');
+} = require(build + '/integrations/database/prisma.service');
 const {
   SupabaseService,
-} = require('../dist/integrations/supabase/supabase.service');
+} = require(build + '/integrations/supabase/supabase.service');
 async function main() {
   const module = await Test.createTestingModule({ imports: [AppModule] })
     .overrideProvider(PrismaService)
@@ -59,7 +60,7 @@ async function main() {
                     c.schema?.$ref?.split('/').at(-1) || (c.schema?.type ?? ''),
                 )
                 .join(', ')
-            : '—',
+            : 'â€”',
         })),
     );
     rows.sort(

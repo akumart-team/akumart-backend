@@ -5847,16 +5847,7 @@
     "/api/v1/assistant/messages": {
       "post": {
         "operationId": "AssistantController_message_v1",
-        "parameters": [
-          {
-            "name": "x-assistant-guest-token",
-            "required": true,
-            "in": "header",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
+        "parameters": [],
         "requestBody": {
           "required": true,
           "content": {
@@ -5878,6 +5869,7 @@
           },
           {}
         ],
+        "summary": "Send a temporary AI support message without saving a conversation",
         "tags": [
           "Assistant"
         ]
@@ -5885,6 +5877,7 @@
     },
     "/api/v1/assistant/conversations/{id}": {
       "get": {
+        "deprecated": true,
         "operationId": "AssistantController_history_v1",
         "parameters": [
           {
@@ -5894,19 +5887,11 @@
             "schema": {
               "type": "string"
             }
-          },
-          {
-            "name": "x-assistant-guest-token",
-            "required": true,
-            "in": "header",
-            "schema": {
-              "type": "string"
-            }
           }
         ],
         "responses": {
-          "200": {
-            "description": ""
+          "410": {
+            "description": "Chat history is not stored."
           }
         },
         "security": [
@@ -5915,6 +5900,7 @@
           },
           {}
         ],
+        "summary": "Retired: conversations are no longer stored",
         "tags": [
           "Assistant"
         ]
@@ -8468,17 +8454,26 @@
       "AssistantMessageDto": {
         "type": "object",
         "properties": {
-          "conversationId": {
+          "sessionId": {
             "type": "string",
-            "format": "uuid"
+            "format": "uuid",
+            "description": "Temporary chat ID. No history is persisted."
           },
           "message": {
             "type": "string",
             "minLength": 1,
             "maxLength": 3000
+          },
+          "history": {
+            "maxItems": 12,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AssistantHistoryDto"
+            }
           }
         },
         "required": [
+          "sessionId",
           "message"
         ]
       },
@@ -8586,6 +8581,27 @@
         },
         "required": [
           "reason"
+        ]
+      },
+      "AssistantHistoryDto": {
+        "type": "object",
+        "properties": {
+          "role": {
+            "type": "string",
+            "enum": [
+              "user",
+              "assistant"
+            ]
+          },
+          "content": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 10000
+          }
+        },
+        "required": [
+          "role",
+          "content"
         ]
       }
     }

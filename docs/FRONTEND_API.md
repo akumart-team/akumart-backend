@@ -28,7 +28,7 @@ Each feature owns its controller, service and `dto/` folder under `src/modules/`
 | `content` | Published articles, saved articles, moderated news and editorial CRUD |
 | `advertising` | Priced packages, campaigns, moderation, placements and signed engagement tracking |
 | `recommendations` | Visible listing/article/job suggestions and feedback events |
-| `assistant` | Owned or guest chat conversations through a configured HTTPS AI adapter |
+| `assistant` | Stateless session chat through a configured HTTPS AI service |
 | `notifications` | Own notification list/unread count, read-one and read-all |
 | `support` | Contact tickets, public enquiries, own tickets and staff queues |
 | `admin` | Staff identity, users, orders, finance records, audited settings and settlement holds |
@@ -181,15 +181,13 @@ visible application records. Current algorithm: `preferences-recency-v1`; these 
 suggestions based on interests, locality/material, recency and eligible partner notices. Dismissed
 listing recommendations are excluded. They are **not** represented as trained AI predictions.
 
-`POST /assistant/messages` accepts `{ message, conversationId? }`. Set `ASSISTANT_API_URL` to an
-HTTPS adapter and `ASSISTANT_API_KEY`; it receives `{ messages: [{ role, content }] }` and must
-return `{ reply: string }`. Only conversation text is sent. It cannot execute admin actions or
-read private application data. The endpoint returns 503 until configured.
+`POST /assistant/messages` accepts `{ sessionId, message, history? }`. `sessionId` is a fresh UUID per temporary chat. History contains at most 12 `{ role: "user" | "assistant", content }` entries; current message is separate (maximum 3000 characters). Auth is optional; the backend derives `user_id` from the verified bearer token, never from the request body.
 
-Authenticated conversations belong to the authenticated profile. A new guest chat returns a
-random `guestToken`; retain it and send `X-Assistant-Guest-Token` on subsequent messages/history
-requests. Only its hash is stored. Treat replies as untrusted text/Markdown in the frontend;
-do not insert raw HTML. The existing hardware camera classifier flow is unchanged.
+Set `ASSISTANT_API_URL=https://akubin-ai-classifier.vercel.app/api/v1/ai/support/messages`. `ASSISTANT_API_KEY` is optional and server-only. The relay sends `user_id`, `session_id`, `message`, and `conversation_history`. It returns `{ data: { reply, escalateToHuman, quickSuggestions, relatedRoutes } }`. Failures return 502; missing configuration returns 503. It has no authority to mutate marketplace or support records.
+
+No conversation/message database writes or server-side history cache are used. The frontend holds chat in React memory only, clears it after 30 minutes without bot interaction, refresh/unmount, logout, account change, or New chat. Closing the panel preserves history until expiry. Only the recent 12 messages are sent as context. The old `GET /assistant/conversations/:id` returns 410; existing historic rows are not read or deleted by this change. The external AI service's own logging/retention must be configured separately.
+
+Replies render as plain text. Related routes are allowlisted by the frontend. Escalation offers the existing Contact support flow; it does not silently save a ticket or transcript. The existing camera classifier is unchanged.
 
 ## Validation
 
