@@ -403,11 +403,14 @@ test(
           .set(auth(user))
           .expect(200);
         assert.equal(wallet.body.data.balancePoints, '2.5');
+        assert.equal(wallet.body.data.balanceValueNaira, '50.00');
+        assert.equal(wallet.body.data.pointValueNaira, '20');
         const otherWallet = await api
           .get(`${prefix}/akubin/me/wallet`)
           .set(auth(other))
           .expect(200);
         assert.equal(otherWallet.body.data.balancePoints, '0');
+        assert.equal(otherWallet.body.data.balanceValueNaira, '0.00');
         const ledger = await api
           .get(`${prefix}/akubin/me/points-ledger`)
           .set(auth(user))
@@ -700,6 +703,14 @@ test(
           .set(auth(user))
           .expect(200);
         assert.equal(summary.body.data.lifetimeEarnedPoints, '2.5');
+        assert.equal(summary.body.data.lifetimeEarnedValueNaira, '50.00');
+        await prisma.platformSettings.update({where:{id:1},data:{pointValueNaira:'7.5'}});
+        const changed = await api.get(`${prefix}/akubin/me/summary`).set(auth(user)).expect(200);
+        assert.equal(changed.body.data.pointValueNaira,'7.5');
+        assert.equal(changed.body.data.lifetimeEarnedPoints,'2.5');
+        assert.equal(changed.body.data.lifetimeEarnedValueNaira,'18.75');
+        await prisma.platformSettings.update({where:{id:1},data:{pointValueNaira:'20'}});
+
         const board = await api
           .get(`${prefix}/akubin/leaderboard?period=all`)
           .set(auth(user))
