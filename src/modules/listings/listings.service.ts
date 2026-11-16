@@ -2,6 +2,7 @@ import {
   BadRequestException,
   ConflictException,
   Injectable,
+  ForbiddenException,
   NotFoundException,
 } from '@nestjs/common';
 import { Prisma } from '../../generated/prisma/client';
@@ -238,6 +239,7 @@ export class ListingsService {
     const where = {
       profileId: user,
       listing: {
+        sellerId: { not: user },
         status: 'published' as const,
         seller: {
           verifications: {
@@ -271,11 +273,41 @@ export class ListingsService {
         where: { profileId: user, listingId: id },
       });
     else {
-      await this.detail(id, user);
-      await this.db.prisma.savedListing.upsert({
-        where: { profileId_listingId: { profileId: user, listingId: id } },
-        create: { profileId: user, listingId: id },
-        update: {},
+      await this.db.transaction(async (tx) => {
+        const preferences = await tx.userPreferences.findUnique({
+          where: { profileId: user },
+        });
+        const buying =
+          preferences?.marketRole === 'buyer' ||
+          (preferences?.marketRole === 'both' &&
+            preferences.activeMode !== 'seller');
+        if (!buying)
+          throw new ForbiddenException(
+            'Use a buyer account or switch to buyer mode to save listings.',
+          );
+        const listing = await tx.listing.findUnique({
+          where: { id },
+          select: { sellerId: true, status: true },
+        });
+        if (!listing) throw new NotFoundException('Listing not found.');
+        if (listing.sellerId === user)
+          throw new ForbiddenException('You cannot save your own listing.');
+        if (listing.status !== 'published')
+          throw new NotFoundException('Listing not found.');
+        const verified = await tx.verificationSubmission.findFirst({
+          where: {
+            profileId: listing.sellerId,
+            level: 'basic',
+            status: 'approved',
+            OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }],
+          },
+        });
+        if (!verified) throw new NotFoundException('Listing not found.');
+        await tx.savedListing.upsert({
+          where: { profileId_listingId: { profileId: user, listingId: id } },
+          create: { profileId: user, listingId: id },
+          update: {},
+        });
       });
     }
     return { data: { saved: !remove } };

@@ -427,6 +427,25 @@ test(
           404,
         );
         await invoke('put', `/users/me/saved-listings/${listingId}`, 'buyer');
+        // Bookmarks are a buyer workflow and never permit saving your own listing.
+        const sellerPreferences = await prisma.userPreferences.findUniqueOrThrow({where:{profileId:identities.seller}});
+        await prisma.userPreferences.update({where:{profileId:identities.seller},data:{marketRole:'both',activeMode:'buyer'}});
+        await invoke('put', `/users/me/saved-listings/${listingId}`, 'seller', undefined, 403);
+        await prisma.userPreferences.update({where:{profileId:identities.seller},data:{marketRole:sellerPreferences.marketRole,activeMode:sellerPreferences.activeMode}});
+        for (const marketRole of ['seller','recycler','logistics','none']) {
+          await prisma.userPreferences.update({where:{profileId:identities.buyer},data:{marketRole,activeMode:marketRole==='seller'?'seller':null}});
+          await invoke('put', `/users/me/saved-listings/${listingId}`, 'buyer', undefined, 403);
+        }
+        await prisma.userPreferences.update({where:{profileId:identities.buyer},data:{marketRole:'both',activeMode:'seller'}});
+        await invoke('put', `/users/me/saved-listings/${listingId}`, 'buyer', undefined, 403);
+        // Removing an existing bookmark remains allowed after switching role/mode.
+        await invoke('delete', `/users/me/saved-listings/${listingId}`, 'buyer');
+        await prisma.userPreferences.update({where:{profileId:identities.buyer},data:{marketRole:'buyer',activeMode:'buyer'}});
+        await invoke('put', `/users/me/saved-listings/${listingId}`, 'buyer');
+        await prisma.userPreferences.update({where:{profileId:identities.buyer},data:{marketRole:'both',activeMode:'buyer'}});
+        await invoke('put', `/users/me/saved-listings/${listingId}`, 'buyer');
+        assert.equal(await prisma.savedListing.count({where:{profileId:identities.seller,listingId}}),0);
+
         const offer = await invoke(
           'post',
           `/listings/${listingId}/offers`,

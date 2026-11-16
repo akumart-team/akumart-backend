@@ -222,3 +222,8 @@ One unexpired active offer per buyer/listing is allowed. Use counteroffers to co
 an active negotiation; duplicate creation returns 409 with the existing offer ID.
 `GET /users/me/offers?mode=buyer&listingId=:uuid` finds that listing's negotiations.
 
+
+
+### Listing bookmark eligibility
+
+Saving a listing is available to Buyer accounts and Buyer & Seller accounts while in buyer mode, and only for another seller's published, eligible listing. The backend enforces ownership and role/mode checks within the save transaction. The frontend hides the bookmark for owners, seller-only accounts, seller mode, recyclers, and logistics accounts. Guests can sign in from the bookmark. Saving is not a trade and does not require buyer verification. Existing bookmarks can still be removed after changing roles or mode; saved-list retrieval excludes your own listings. Article bookmarks are independent.
